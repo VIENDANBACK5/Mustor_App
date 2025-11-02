@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="Music App"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+        android:usesCleartextTraffic="true"
+        tools:targetApi="31">
+
+        <!-- Login is the launcher -->
+        <activity
+            android:name=".login.LoginActivity"
+            android:exported="true"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- ADDED: RegisterActivity declaration -->
+        <activity
+            android:name=".login.RegisterActivity"
+            android:screenOrientation="portrait" />
+
+        <!-- Main screen -->
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".SearchActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Other activities -->
+        <activity android:name=".profile.ProfileActivity" />
+        <activity android:name=".libary.LibraryActivity" />
+        <activity android:name=".profile.FavoritesActivity" />
+        <activity android:name=".playlist.PlaylistsActivity" />
+        <activity android:name=".profile.HistoryActivity" />
+        <activity android:name=".profile.SettingsActivity" />
+        <activity android:name=".profile.AboutActivity" />
+
+        <activity
+            android:name=".playlist.PlayerActivity"
+            android:screenOrientation="portrait" />
+
+        <service
+            android:name=".MusicService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+
+        <activity
+            android:name=".chatbot.ChatbotActivity"
+            android:label="Chatbot" />
+
+    </application>
+
+</manifest>
