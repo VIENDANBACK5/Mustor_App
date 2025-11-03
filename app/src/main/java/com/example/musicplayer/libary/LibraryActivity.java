@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,7 +30,9 @@ import java.util.List;
 public class LibraryActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
-    private TextView tabSongs, tabAlbums, tabArtists, tabFavorites, btnBack;
+    private TextView tabSongs, tabAlbums, tabArtists, tabFavorites;
+
+    private ImageButton btnBack;
     private EditText searchBox;
     private LibraryAdapter adapter;
     private RequestQueue requestQueue;

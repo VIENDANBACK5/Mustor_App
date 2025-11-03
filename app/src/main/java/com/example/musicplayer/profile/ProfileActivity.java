@@ -1,19 +1,25 @@
 package com.example.musicplayer.profile;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.musicplayer.MainActivity;
 import com.example.musicplayer.R;
 import com.example.musicplayer.api.DeezerApi;
 import com.example.musicplayer.login.LoginActivity;
 import com.example.musicplayer.login.UpdateUserRequest;
 
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -22,32 +28,32 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    private EditText etProfileFullName, etProfileEmail, etProfilePhone, etProfileAddress;
-    private Button btnSaveChanges, btnChangePassword;
-    private DeezerApi deezerApi;
     private LoginActivity.SessionManager sessionManager;
+    private LoginActivity.AuthTokenResponse.User currentUser;
+
+    private DeezerApi deezerApi;
+
+    private ImageButton btnBackProfile;
+
+    private TextView tvUserName, tvUserEmail;
+
+    private LinearLayout btnEditProfile, btnLogout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
+        // Initialize session manager before any logout or auth actions
         sessionManager = new LoginActivity.SessionManager(this);
 
-        setupRetrofit();
-        initViews();
-        loadUserData();
-        setupListeners();
-    }
-
-    private void setupRetrofit() {
-        // CORRECT IMPLEMENTATION: Use an Interceptor to add the auth token
+        // Setup Retrofit / API client with auth interceptor
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .addInterceptor(chain -> {
                     String token = sessionManager.getAccessToken();
-                    okhttp3.Request.Builder builder = chain.request().newBuilder();
+                    Request.Builder builder = chain.request().newBuilder();
                     if (token != null) {
-                        builder.header("Authorization", "Bearer " + token);
+                        builder.addHeader("Authorization", "Bearer " + token);
                     }
                     return chain.proceed(builder.build());
                 })
@@ -55,72 +61,85 @@ public class ProfileActivity extends AppCompatActivity {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://192.168.30.28:5030/")
-                .client(okHttpClient) // Use the client with the interceptor
+                .client(okHttpClient)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
+
         deezerApi = retrofit.create(DeezerApi.class);
-    }
 
-    private void initViews() {
-        etProfileFullName = findViewById(R.id.etProfileFullName);
-        etProfileEmail = findViewById(R.id.etProfileEmail);
-        etProfilePhone = findViewById(R.id.etProfilePhone);
-        etProfileAddress = findViewById(R.id.etProfileAddress);
-        btnSaveChanges = findViewById(R.id.btnSaveChanges);
-        btnChangePassword = findViewById(R.id.btnChangePassword);
+        btnBackProfile = findViewById(R.id.btnBackProfile);
+        btnEditProfile = findViewById(R.id.btnEditProfile);
+        btnLogout = findViewById(R.id.btnLogout);
 
-        etProfileEmail.setEnabled(false);
-    }
+        tvUserName = findViewById(R.id.tvUserName);
+        tvUserEmail = findViewById(R.id.tvUserEmail);
 
-    private void loadUserData() {
-        String fullName = getIntent().getStringExtra("USER_NAME");
-        String email = getIntent().getStringExtra("USER_EMAIL");
-
-        etProfileFullName.setText(fullName);
-        etProfileEmail.setText(email);
-    }
-
-    private void setupListeners() {
-        btnSaveChanges.setOnClickListener(v -> handleSaveChanges());
-
-        btnChangePassword.setOnClickListener(v -> {
-            Toast.makeText(this, "Chuyển đến màn hình đổi mật khẩu", Toast.LENGTH_SHORT).show();
-        });
-    }
-
-    private void handleSaveChanges() {
-        String fullName = etProfileFullName.getText().toString().trim();
-        String email = etProfileEmail.getText().toString().trim();
-        String phone = etProfilePhone.getText().toString().trim();
-        String address = etProfileAddress.getText().toString().trim();
-
-        if (fullName.isEmpty()) {
-            Toast.makeText(this, "Họ và tên không được để trống", Toast.LENGTH_SHORT).show();
-            return;
+        // TODO: Load user profile data
+        TextView tvTitle = findViewById(R.id.tvTitle);
+        if (tvTitle != null) {
+            tvTitle.setText("Hồ sơ cá nhân");
         }
 
-        LoginActivity.UpdateProfileRequest request = new LoginActivity.UpdateProfileRequest();
-        request.fullName = fullName;
-        request.email = email;
-        request.phone = phone;
-        request.address = address;
+        loadUserProfile();
 
-        deezerApi.updateProfile(request).enqueue(new Callback<Void>() {
+        setupBackButton();
+        setupEditButton();
+        setupLogoutButton();
+    }
+
+    private void loadUserProfile() {
+        deezerApi.getMe().enqueue(new Callback<LoginActivity.AuthTokenResponse.User>() {
             @Override
-            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                if (response.isSuccessful()) {
-                    Toast.makeText(ProfileActivity.this, "Cập nhật hồ sơ thành công!", Toast.LENGTH_SHORT).show();
-                    finish();
+            public void onResponse(@NonNull Call<LoginActivity.AuthTokenResponse.User> call,
+                                   @NonNull Response<LoginActivity.AuthTokenResponse.User> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    currentUser = response.body();
+                    updateUser();
                 } else {
-                    Toast.makeText(ProfileActivity.this, "Lỗi cập nhật hồ sơ. Mã lỗi: " + response.code(),
-                            Toast.LENGTH_SHORT).show();
+                    handleLogout();
                 }
             }
 
             @Override
-            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                Toast.makeText(ProfileActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            public void onFailure(@NonNull Call<LoginActivity.AuthTokenResponse.User> call, @NonNull Throwable t) {
+                Toast.makeText(ProfileActivity.this, "Could not load user profile", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void setupLogoutButton() {
+        btnLogout.setOnClickListener(v -> handleLogout());
+    }
+
+    private void setupBackButton() {
+        btnBackProfile.setOnClickListener(v -> finish());
+    }
+    private void setupEditButton(){
+        btnEditProfile.setOnClickListener(v -> {
+            if (currentUser != null) {
+                Intent intent = new Intent(this, EditProfileActivity.class);
+                intent.putExtra("USER_NAME", currentUser.fullName);
+                intent.putExtra("USER_EMAIL", currentUser.email);
+                startActivity(intent);
+            } else {
+                Toast.makeText(this, "User data not loaded yet", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void updateUser(){
+        if (currentUser != null) {
+            tvUserName.setText(currentUser.fullName);
+            tvUserEmail.setText(currentUser.email);
+        }
+    }
+
+    private void handleLogout(){
+        sessionManager.clear();
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.addFlags(
+                Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }

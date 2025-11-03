@@ -57,6 +57,7 @@
         <activity android:name=".profile.HistoryActivity" />
         <activity android:name=".profile.SettingsActivity" />
         <activity android:name=".profile.AboutActivity" />
+        <activity android:name=".profile.EditProfileActivity"/>
 
         <activity
             android:name=".playlist.activity.PlayerActivity"

@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity
         setupRetrofit();
         setupDrawer();
         setupRecyclerView();
-        setupTopBar();
+//        setupTopBar();
         setupSearchBar();
         setupTabs();
         setupChatbot();
@@ -248,39 +248,39 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void loadInitialData() {
-        loadUserProfile();
+//        loadUserProfile();
         loadRecommendedSongs();
     }
 
-    private void loadUserProfile() {
-        deezerApi.getMe().enqueue(new Callback<LoginActivity.AuthTokenResponse.User>() {
-            @Override
-            public void onResponse(@NonNull Call<LoginActivity.AuthTokenResponse.User> call,
-                                   @NonNull Response<LoginActivity.AuthTokenResponse.User> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    currentUser = response.body();
-                    updateDrawerHeader();
-                } else {
-                    handleLogout();
-                }
-            }
+    // private void loadUserProfile() {
+    //     deezerApi.getMe().enqueue(new Callback<LoginActivity.AuthTokenResponse.User>() {
+    //         @Override
+    //         public void onResponse(@NonNull Call<LoginActivity.AuthTokenResponse.User> call,
+    //                                @NonNull Response<LoginActivity.AuthTokenResponse.User> response) {
+    //             if (response.isSuccessful() && response.body() != null) {
+    //                 currentUser = response.body();
+    //                 updateDrawerHeader();
+    //             } else {
+    //                 handleLogout();
+    //             }
+    //         }
 
-            @Override
-            public void onFailure(@NonNull Call<LoginActivity.AuthTokenResponse.User> call, @NonNull Throwable t) {
-                Toast.makeText(MainActivity.this, "Could not load user profile", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
+    //         @Override
+    //         public void onFailure(@NonNull Call<LoginActivity.AuthTokenResponse.User> call, @NonNull Throwable t) {
+    //             Toast.makeText(MainActivity.this, "Could not load user profile", Toast.LENGTH_SHORT).show();
+    //         }
+    //     });
+    // }
 
-    private void updateDrawerHeader() {
-        if (currentUser != null) {
-            View headerView = navigationView.getHeaderView(0);
-            TextView tvUserName = headerView.findViewById(R.id.tvUserName);
-            TextView tvUserEmail = headerView.findViewById(R.id.tvUserEmail);
-            tvUserName.setText(currentUser.fullName);
-            tvUserEmail.setText(currentUser.email);
-        }
-    }
+    // private void updateDrawerHeader() {
+    //     if (currentUser != null) {
+    //         View headerView = navigationView.getHeaderView(0);
+    //         TextView tvUserName = headerView.findViewById(R.id.tvUserName);
+    //         TextView tvUserEmail = headerView.findViewById(R.id.tvUserEmail);
+    //         tvUserName.setText(currentUser.fullName);
+    //         tvUserEmail.setText(currentUser.email);
+    //     }
+    // }
 
     private void loadRecommendedSongs() {
         deezerApi.getChart(20).enqueue(new Callback<JsonObject>() {
@@ -407,8 +407,6 @@ public class MainActivity extends AppCompatActivity
                 musicService.togglePlayPause();
             }
         });
-
-        // GÁN LISTENER CHO CÁC NÚT MỚI:
 
         // Click vào nút Previous
         btnMiniPrevious.setOnClickListener(v -> {
@@ -554,20 +552,20 @@ public class MainActivity extends AppCompatActivity
         findViewById(R.id.btnMenu).setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
     }
 
-    private void setupTopBar() {
-        findViewById(R.id.btnProfile).setOnClickListener(v -> openProfile());
-    }
-
-    private void openProfile() {
-        if (currentUser != null) {
-            Intent intent = new Intent(this, ProfileActivity.class);
-            intent.putExtra("USER_NAME", currentUser.fullName);
-            intent.putExtra("USER_EMAIL", currentUser.email);
-            startActivity(intent);
-        } else {
-            Toast.makeText(this, "User data not loaded yet", Toast.LENGTH_SHORT).show();
-        }
-    }
+//    private void setupTopBar() {
+//        findViewById(R.id.btnProfile).setOnClickListener(v -> openProfile());
+//    }
+//
+//    private void openProfile() {
+//        if (currentUser != null) {
+//            Intent intent = new Intent(this, ProfileActivity.class);
+//            intent.putExtra("USER_NAME", currentUser.fullName);
+//            intent.putExtra("USER_EMAIL", currentUser.email);
+//            startActivity(intent);
+//        } else {
+//            Toast.makeText(this, "User data not loaded yet", Toast.LENGTH_SHORT).show();
+//        }
+//    }
 
     private void handleLogout() {
         sessionManager.clear();
@@ -581,13 +579,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.nav_profile) {
-            openProfile();
-        } else if (id == R.id.nav_settings) {
-            startActivity(new Intent(this, SettingsActivity.class));
-        } else if (id == R.id.nav_logout) {
-            handleLogout();
-        } else if (id == R.id.nav_library) {
+        if (id == R.id.nav_library) {
             startActivity(new Intent(this, LibraryActivity.class));
         } else if (id == R.id.nav_favorites) {
             startActivity(new Intent(this, FavoritesActivity.class));
