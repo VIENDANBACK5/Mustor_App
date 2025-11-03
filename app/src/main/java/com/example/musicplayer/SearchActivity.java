@@ -139,13 +139,16 @@ public class SearchActivity extends AppCompatActivity implements MusicAdapter.On
             public void onResponse(@NonNull Call<DeezerSearchResponse> call,
                     @NonNull Response<DeezerSearchResponse> response) {
                 searchResults.clear();
-                if (response.isSuccessful() && response.body() != null && response.body().tracks != null) {
-                    if (response.body().tracks.isEmpty()) {
+                // ✅ Fix: API returns { "code": 200, "data": { "tracks": [...] } }
+                if (response.isSuccessful() && response.body() != null 
+                        && response.body().data != null 
+                        && response.body().data.tracks != null) {
+                    if (response.body().data.tracks.isEmpty()) {
                         tvNoResults.setVisibility(View.VISIBLE);
                         tvNoResults.setText("Không tìm thấy kết quả cho \"" + query + "\"");
                     } else {
                         tvNoResults.setVisibility(View.GONE);
-                        for (DeezerTrack track : response.body().tracks) {
+                        for (DeezerTrack track : response.body().data.tracks) {
                             Song song = new Song(
                                     track.id,
                                     track.name,

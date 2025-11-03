@@ -25,11 +25,9 @@ public interface DeezerApi {
     Call<LoginActivity.AuthTokenResponse.User> getMe();
 
     // ==================== PROFILE ENDPOINTS ====================
-
-    @PUT("/api/auth/profile")
-    Call<Void> updateProfile(@Body LoginActivity.UpdateProfileRequest request);
-
-    // ==================== DEEZER MUSIC ENDPOINTS ====================
+    
+    @PUT("/api/auth/me")
+    Call<Void> updateProfile(@Body LoginActivity.UpdateProfileRequest request);    // ==================== DEEZER MUSIC ENDPOINTS ====================
 
     // Play track và tự động save vào history (auto-save)
     @POST("/api/deezer/tracks/{track_id}/play")
@@ -44,7 +42,7 @@ public interface DeezerApi {
     // Search tracks
     @GET("/api/deezer/search/tracks")
     Call<DeezerSearchResponse> searchTracks(
-            @Query("query") String query,
+            @Query("q") String query,  // ✅ Fixed: uses "q" as per documentation
             @Query("limit") int limit,
             @Query("offset") int offset);
 

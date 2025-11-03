@@ -32,7 +32,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         HistoryResponse.HistoryItem item = historyItems.get(position);
         holder.textViewTrackName.setText(item.trackName);
-        
+
         // Format: Artist - Time (e.g., "Hoang Thuy Linh - 2025-11-02 17:29")
         String artistAndTime = item.artistName + " - " + formatTime(item.listenedAt);
         holder.textViewArtistAndTime.setText(artistAndTime);

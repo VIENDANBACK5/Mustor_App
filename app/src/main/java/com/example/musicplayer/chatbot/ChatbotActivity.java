@@ -114,7 +114,8 @@ public class ChatbotActivity extends AppCompatActivity {
                 if (!response.isSuccessful()) {
                     Log.e(TAG, "Unexpected code " + response);
                     runOnUiThread(() -> {
-                        ChatMessage errorMessage = new ChatMessage("system", "Error: Server returned " + response.code());
+                        ChatMessage errorMessage = new ChatMessage("system",
+                                "Error: Server returned " + response.code());
                         messageList.add(errorMessage);
                         adapter.notifyItemInserted(messageList.size() - 1);
                     });
@@ -123,7 +124,7 @@ public class ChatbotActivity extends AppCompatActivity {
 
                 try {
                     JSONObject responseObject = new JSONObject(responseBody);
-                    
+
                     // Ưu tiên field "reply" từ API
                     String replyText;
                     if (responseObject.has("reply")) {
@@ -148,8 +149,8 @@ public class ChatbotActivity extends AppCompatActivity {
                         replyText = "Sorry, I don't understand. (API response format unexpected)";
                     }
 
-                    Log.d(TAG, "📤 Extracted reply (" + replyText.length() + " chars): " + 
-                          (replyText.length() > 100 ? replyText.substring(0, 100) + "..." : replyText));
+                    Log.d(TAG, "📤 Extracted reply (" + replyText.length() + " chars): " +
+                            (replyText.length() > 100 ? replyText.substring(0, 100) + "..." : replyText));
 
                     final String finalReply = replyText;
                     ChatMessage botMessage = new ChatMessage("assistant", finalReply);

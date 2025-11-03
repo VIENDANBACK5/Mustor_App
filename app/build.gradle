@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.example.musicplayer"
-    compileSdk = 36
+    compileSdk = 36  // ✅ Android 16 (required by androidx.activity:1.11.0)
 
     defaultConfig {
         applicationId = "com.example.musicplayer"
-        minSdk = 25
-        targetSdk = 36
+        minSdk = 25  // Android 7.1 Nougat (support 95%+ devices)
+        targetSdk = 35  // ✅ Android 15 (keep stable, compileSdk can be higher)
         versionCode = 1
         versionName = "1.0"
 

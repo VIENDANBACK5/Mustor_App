@@ -43,7 +43,7 @@ public class HistoryActivity extends AppCompatActivity {
         setupRetrofit();
         setupRecyclerView();
         fetchHistory();
-        
+
         // DEBUG: Add long click listener to refresh
         recyclerViewHistory = findViewById(R.id.recyclerViewHistory);
         recyclerViewHistory.setOnLongClickListener(v -> {
@@ -57,8 +57,9 @@ public class HistoryActivity extends AppCompatActivity {
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .addInterceptor(chain -> {
                     String token = sessionManager.getAccessToken();
-                    android.util.Log.d("HistoryActivity", "🔑 Token from session: " + (token != null ? "Found (" + token.length() + " chars)" : "NULL"));
-                    
+                    android.util.Log.d("HistoryActivity", "🔑 Token from session: "
+                            + (token != null ? "Found (" + token.length() + " chars)" : "NULL"));
+
                     okhttp3.Request.Builder builder = chain.request().newBuilder();
                     if (token != null) {
                         builder.header("Authorization", "Bearer " + token);
@@ -92,32 +93,36 @@ public class HistoryActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call<HistoryResponse> call, @NonNull Response<HistoryResponse> response) {
                 android.util.Log.d("HistoryActivity", "📥 Response code: " + response.code());
-                
+
                 // Log raw response body
                 try {
                     if (response.body() != null) {
-                        android.util.Log.d("HistoryActivity", "📦 Raw response: " + new com.google.gson.Gson().toJson(response.body()));
+                        android.util.Log.d("HistoryActivity",
+                                "📦 Raw response: " + new com.google.gson.Gson().toJson(response.body()));
                     }
                 } catch (Exception e) {
                     android.util.Log.e("HistoryActivity", "Failed to log response", e);
                 }
-                
+
                 if (response.isSuccessful() && response.body() != null) {
                     HistoryResponse historyResponse = response.body();
                     android.util.Log.d("HistoryActivity", "✅ Response body received");
-                    android.util.Log.d("HistoryActivity", "History list: " + (historyResponse.history != null ? historyResponse.history.size() + " items" : "null"));
+                    android.util.Log.d("HistoryActivity", "History list: "
+                            + (historyResponse.history != null ? historyResponse.history.size() + " items" : "null"));
                     android.util.Log.d("HistoryActivity", "Total: " + historyResponse.total);
-                    
+
                     if (historyResponse.history != null && !historyResponse.history.isEmpty()) {
                         historyList.clear();
                         historyList.addAll(historyResponse.history);
                         adapter.notifyDataSetChanged();
-                        android.util.Log.d("HistoryActivity", "✅ Updated RecyclerView with " + historyList.size() + " items");
-                        
+                        android.util.Log.d("HistoryActivity",
+                                "✅ Updated RecyclerView with " + historyList.size() + " items");
+
                         // Log first item details
                         if (!historyList.isEmpty()) {
                             HistoryResponse.HistoryItem first = historyList.get(0);
-                            android.util.Log.d("HistoryActivity", "📀 First item: " + first.trackName + " by " + first.artistName);
+                            android.util.Log.d("HistoryActivity",
+                                    "📀 First item: " + first.trackName + " by " + first.artistName);
                         }
                     } else {
                         android.util.Log.w("HistoryActivity", "⚠️ History list is empty or null");

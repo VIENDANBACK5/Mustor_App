@@ -10,6 +10,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -291,6 +292,12 @@ public class MainActivity extends AppCompatActivity
                         JsonObject data = responseBody.getAsJsonObject("data");
                         if (data.has("top_tracks")) {
                             com.google.gson.JsonArray topTracks = data.getAsJsonArray("top_tracks");
+                            
+                            if (topTracks == null || topTracks.size() == 0) {
+                                Toast.makeText(MainActivity.this, "No chart data available", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            
                             List<DeezerTrack> tracks = new ArrayList<>();
 
                             for (int i = 0; i < topTracks.size(); i++) {
@@ -329,7 +336,17 @@ public class MainActivity extends AppCompatActivity
             public void onResponse(@NonNull Call<DeezerSearchResponse> call,
                                    @NonNull Response<DeezerSearchResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    updateSongList(response.body().tracks);
+                    DeezerSearchResponse searchResponse = response.body();
+                    // ✅ Fix: API returns { "code": 200, "data": { "tracks": [...] } }
+                    if (searchResponse.data != null 
+                            && searchResponse.data.tracks != null 
+                            && !searchResponse.data.tracks.isEmpty()) {
+                        updateSongList(searchResponse.data.tracks);
+                    } else {
+                        Toast.makeText(MainActivity.this, "No results found", Toast.LENGTH_SHORT).show();
+                        songList.clear();
+                        adapter.notifyDataSetChanged();
+                    }
                 }
             }
 
@@ -341,6 +358,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void updateSongList(List<DeezerTrack> tracks) {
+        if (tracks == null || tracks.isEmpty()) {
+            Log.w(TAG, "⚠️ updateSongList called with null or empty tracks");
+            return;
+        }
+        
         songList.clear();
         for (DeezerTrack track : tracks) {
             songList.add(new Song(track.id, track.name, track.getArtistsString(), track.imageUrl, track.previewUrl, "",
@@ -349,6 +371,8 @@ public class MainActivity extends AppCompatActivity
         allSongs.clear();
         allSongs.addAll(songList);
         adapter.notifyDataSetChanged();
+        
+        Log.d(TAG, "✅ Updated song list with " + tracks.size() + " tracks");
     }
     // ...
 

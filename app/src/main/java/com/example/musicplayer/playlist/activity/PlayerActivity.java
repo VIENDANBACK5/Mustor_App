@@ -229,6 +229,9 @@ public class PlayerActivity extends AppCompatActivity
                 currentPlayingTrackId = song.id;
                 Log.d(TAG, "⏱️ Song playback started: " + song.title);
 
+                // ✅ LƯU LỊCH SỬ NGAY KHI BẮT ĐẦU PHÁT (không cần đợi nghe hết)
+                saveHistoryImmediately(song, duration);
+
                 startSeekBarUpdater();
                 uiHelper.startDiscAnimation();
 
@@ -243,7 +246,7 @@ public class PlayerActivity extends AppCompatActivity
 
             mediaPlayer.setOnCompletionListener(mp -> {
                 Log.d(TAG, "Song completed");
-                saveHistoryOnComplete(song);
+                // ℹ️ History đã được lưu ngay khi bắt đầu phát
                 songStartTime = 0;
                 currentPlayingTrackId = null;
                 handleSongCompletion();
@@ -257,23 +260,48 @@ public class PlayerActivity extends AppCompatActivity
         }
     }
 
-    private void saveHistoryOnComplete(Song song) {
-        if (song == null || song.id == null || song.id.isEmpty()) return;
-        if (deezerApi == null || historyManager == null) return;
+    /**
+     * 🎵 LƯU LỊCH SỬ NGAY KHI BẮT ĐẦU PHÁT BÀI HÁT
+     * Gọi API POST /api/deezer/tracks/{id}/play với duration là thời lượng bài hát
+     * Không cần đợi nghe hết, đánh dấu luôn khi ấn play
+     */
+    private void saveHistoryImmediately(Song song, int songDurationMs) {
+        if (song == null || song.id == null || song.id.isEmpty()) {
+            Log.w(TAG, "⚠️ Cannot save history: Invalid song");
+            return;
+        }
+        if (deezerApi == null || historyManager == null) {
+            Log.w(TAG, "⚠️ Cannot save history: API not initialized");
+            return;
+        }
         String validToken = sessionManager.getValidAccessToken();
-        if (validToken == null || songStartTime <= 0) return;
+        if (validToken == null) {
+            Log.w(TAG, "⚠️ Cannot save history: No valid token");
+            return;
+        }
 
-        long actualPlayTimeMs = System.currentTimeMillis() - songStartTime;
-        final int playDurationSeconds = (int) (actualPlayTimeMs / 1000);
+        // Sử dụng thời lượng bài hát (duration) làm play_duration_seconds
+        final int playDurationSeconds = songDurationMs / 1000;
 
+        Log.d(TAG, "📝 Saving history immediately: " + song.title + " (" + playDurationSeconds + "s)");
+        
         historyManager.saveHistoryAutoSave(
                 deezerApi,
                 song.id,
                 playDurationSeconds,
                 new HistoryManager.HistorySaveCallback() {
-                    @Override public void onSuccess() { Log.d(TAG, "✅ History saved"); }
-                    @Override public void onError(int code, String message) { Log.e(TAG, "❌ History save failed: " + code); }
-                    @Override public void onSkipped(String reason) { Log.d(TAG, "⏭️ History skipped: " + reason); }
+                    @Override 
+                    public void onSuccess() { 
+                        Log.d(TAG, "✅ History saved successfully on play start"); 
+                    }
+                    @Override 
+                    public void onError(int code, String message) { 
+                        Log.e(TAG, "❌ History save failed: " + code + " - " + message); 
+                    }
+                    @Override 
+                    public void onSkipped(String reason) { 
+                        Log.d(TAG, "⏭️ History skipped: " + reason); 
+                    }
                 }
         );
     }
@@ -425,7 +453,7 @@ public class PlayerActivity extends AppCompatActivity
             return;
         }
 
-        saveHistoryOnComplete(playlist.get(currentSongIndex));
+        // ℹ️ History sẽ được lưu tự động khi bài mới bắt đầu phát
         songStartTime = 0;
         currentPlayingTrackId = null;
 
@@ -452,7 +480,7 @@ public class PlayerActivity extends AppCompatActivity
             return;
         }
 
-        saveHistoryOnComplete(playlist.get(currentSongIndex));
+        // ℹ️ History sẽ được lưu tự động khi bài mới bắt đầu phát
         songStartTime = 0;
         currentPlayingTrackId = null;
 
@@ -521,9 +549,7 @@ public class PlayerActivity extends AppCompatActivity
         if (favoritesManager != null) favoritesManager.removeListener(this);
         if (serviceBound) unbindService(serviceConnection);
 
-        if (playlist != null && !playlist.isEmpty() && currentSongIndex >= 0 && currentSongIndex < playlist.size()) {
-            saveHistoryOnComplete(playlist.get(currentSongIndex));
-        }
+        // ℹ️ History đã được lưu khi bắt đầu phát, không cần lưu lại khi destroy
 
         if (mediaPlayer != null) {
             try {
@@ -557,13 +583,11 @@ public class PlayerActivity extends AppCompatActivity
     @Override
     protected void onStop() {
         super.onStop();
-        if (playlist != null && !playlist.isEmpty() && currentSongIndex >= 0 && currentSongIndex < playlist.size()) {
-            if (songStartTime > 0) {
-                Log.d(TAG, "💾 App stopped, saving history...");
-                saveHistoryOnComplete(playlist.get(currentSongIndex));
-                songStartTime = 0;
-                currentPlayingTrackId = null;
-            }
+        // ℹ️ History đã được lưu khi bắt đầu phát, không cần lưu lại khi stop
+        if (songStartTime > 0) {
+            Log.d(TAG, "💾 App stopped");
+            songStartTime = 0;
+            currentPlayingTrackId = null;
         }
     }
 }
