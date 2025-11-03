@@ -17,6 +17,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.musicplayer.R;
+import com.example.musicplayer.playlist.activity.PlayerActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -75,7 +76,7 @@ public class LibraryActivity extends AppCompatActivity {
         adapter = new LibraryAdapter(this, items, new LibraryAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(LibraryItem item) {
-                Intent intent = new Intent(LibraryActivity.this, com.example.musicplayer.playlist.PlayerActivity.class);
+                Intent intent = new Intent(LibraryActivity.this, PlayerActivity.class);
 
                 // Truyền dữ liệu bài hát sang PlayerActivity
                 intent.putExtra("title", item.getTitle());

@@ -16,6 +16,7 @@ import android.util.Log;
 import androidx.core.app.NotificationCompat;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class MusicService extends Service {
     private static final String TAG = "MusicService";
@@ -24,19 +25,23 @@ public class MusicService extends Service {
 
     private MediaPlayer mediaPlayer;
     private ArrayList<Song> playlist = new ArrayList<>();
-    private int currentSongIndex = 0;
+    private LinkedList<Song> queue = new LinkedList<>(); // Hàng đợi
+
+    // Biến trạng thái
+    private Song currentSong = null; // QUAN TRỌNG: Nguồn chân lý cho bài hát đang phát
+    private int currentSongIndex = -1; // -1 nghĩa là đang phát từ queue
     private boolean isPlaying = false;
     private boolean isShuffle = false;
-    private int repeatMode = 0; // 0: no repeat, 1: repeat all, 2: repeat one
+    private int repeatMode = 0; // 0: No, 1: All, 2: One
 
     private final IBinder binder = new MusicBinder();
     private MusicServiceCallback callback;
 
-    /** Interface cho callback giữa Service và Activity */
     public interface MusicServiceCallback {
         void onPlaybackStateChanged(boolean isPlaying);
         void onSongChanged(Song song, int position);
         void onProgressChanged(int currentPosition, int duration);
+        void onQueueUpdated(); // Callback khi queue thay đổi
     }
 
     public class MusicBinder extends Binder {
@@ -57,90 +62,36 @@ public class MusicService extends Service {
         return binder;
     }
 
+    // ========== PUBLIC API FOR ACTIVITIES ==========
+
     public void setCallback(MusicServiceCallback callback) {
         this.callback = callback;
     }
 
     /**
-     * Gán danh sách phát + chỉ định vị trí bắt đầu phát
+     * THÊM MỚI: Trả về callback để MainActivity đồng bộ
+     */
+    public MusicServiceCallback getCallback() {
+        return this.callback;
+    }
+
+    /**
+     * Đặt playlist mới và bắt đầu phát
      */
     public void setPlaylist(ArrayList<Song> playlist, int startIndex) {
         this.playlist = new ArrayList<>(playlist);
-        this.currentSongIndex = startIndex;
+        // Xóa queue khi playlist mới được set
+        this.queue.clear();
+        if (callback != null) callback.onQueueUpdated();
+
         playSong(startIndex);
     }
 
     /**
-     * Gán danh sách phát + callback listener (tùy chọn)
-     * — tránh lỗi nếu bạn gọi setPlaylist(list, (song)->{...})
+     * CHỈNH SỬA: Đổi tên từ playPause() -> togglePlayPause()
      */
-    public void setPlaylist(ArrayList<Song> playlist, MusicServiceCallback callback) {
-        this.playlist = new ArrayList<>(playlist);
-        this.currentSongIndex = 0;
-        this.callback = callback;
-        playSong(0);
-    }
-
-    public void playSong(int index) {
-        if (playlist == null || playlist.isEmpty() || index < 0 || index >= playlist.size()) {
-            Log.e(TAG, "⚠️ Invalid playlist or index");
-            return;
-        }
-
-        currentSongIndex = index;
-        Song song = playlist.get(currentSongIndex);
-
-        try {
-            if (mediaPlayer != null) {
-                mediaPlayer.reset();
-            } else {
-                mediaPlayer = new MediaPlayer();
-                mediaPlayer.setAudioAttributes(
-                        new AudioAttributes.Builder()
-                                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                                .setUsage(AudioAttributes.USAGE_MEDIA)
-                                .build()
-                );
-
-                mediaPlayer.setOnCompletionListener(mp -> handleSongCompletion());
-                mediaPlayer.setOnErrorListener((mp, what, extra) -> {
-                    Log.e(TAG, "MediaPlayer error: " + what);
-                    return true;
-                });
-            }
-
-            mediaPlayer.setDataSource(song.audio);
-            mediaPlayer.prepareAsync();
-
-            mediaPlayer.setOnPreparedListener(mp -> {
-                mp.start();
-                isPlaying = true;
-                updateNotification();
-                if (callback != null) {
-                    callback.onPlaybackStateChanged(true);
-                    callback.onSongChanged(song, currentSongIndex);
-                }
-                Log.d(TAG, "🎵 Playing: " + song.title);
-            });
-
-        } catch (Exception e) {
-            Log.e(TAG, "❌ Error playing song: " + e.getMessage());
-        }
-    }
-
-    private void handleSongCompletion() {
-        if (repeatMode == 2) {
-            playSong(currentSongIndex);
-        } else if (repeatMode == 1 || currentSongIndex < playlist.size() - 1) {
-            playNext();
-        } else {
-            isPlaying = false;
-            if (callback != null) callback.onPlaybackStateChanged(false);
-        }
-    }
-
-    public void playPause() {
-        if (mediaPlayer == null) return;
+    public void togglePlayPause() {
+        if (mediaPlayer == null || currentSong == null) return;
 
         try {
             if (isPlaying) {
@@ -153,12 +104,26 @@ public class MusicService extends Service {
             updateNotification();
             if (callback != null) callback.onPlaybackStateChanged(isPlaying);
         } catch (Exception e) {
-            Log.e(TAG, "Error play/pause: " + e.getMessage());
+            Log.e(TAG, "Error togglePlayPause: " + e.getMessage());
         }
     }
 
+    /**
+     * Phát bài hát tiếp theo (ưu tiên từ queue)
+     */
     public void playNext() {
-        if (playlist.size() <= 1) return;
+        // Nếu có bài trong queue, phát bài đó trước
+        if (!queue.isEmpty()) {
+            Song nextSong = queue.poll(); // Lấy và xóa bài đầu queue
+            playQueueSong(nextSong);
+            if (callback != null) {
+                callback.onQueueUpdated();
+            }
+            return;
+        }
+
+        // Không có queue, phát bài tiếp theo trong playlist
+        if (playlist.isEmpty()) return;
 
         if (isShuffle) {
             int randomIndex;
@@ -171,38 +136,95 @@ public class MusicService extends Service {
         }
     }
 
+    /**
+     * Phát bài hát trước đó (bỏ qua queue)
+     */
     public void playPrevious() {
-        if (playlist.size() <= 1) return;
+        if (playlist.isEmpty()) return;
+
+        // Nếu đang phát từ queue, quay lại bài playlist trước đó
+        if (currentSongIndex == -1 && !playlist.isEmpty()) {
+            playSong(0); // Quay về bài đầu playlist
+            return;
+        }
+
         playSong((currentSongIndex - 1 + playlist.size()) % playlist.size());
     }
 
+    // ========== QUEUE MANAGEMENT (Giữ nguyên) ==========
+
+    public void addToQueue(Song song) {
+        queue.add(song);
+        if (callback != null) callback.onQueueUpdated();
+        Log.d(TAG, "➕ Added to queue: " + song.title);
+    }
+
+    public ArrayList<Song> getQueue() {
+        return new ArrayList<>(queue);
+    }
+
+    public void removeFromQueue(int position) {
+        if (position >= 0 && position < queue.size()) {
+            Song removed = new ArrayList<>(queue).get(position);
+            queue.remove(removed);
+            if (callback != null) callback.onQueueUpdated();
+            Log.d(TAG, "➖ Removed from queue: " + removed.title);
+        }
+    }
+
+    public void clearQueue() {
+        queue.clear();
+        if (callback != null) callback.onQueueUpdated();
+        Log.d(TAG, "🗑️ Queue cleared");
+    }
+
+    public void moveQueueItem(int fromPosition, int toPosition) {
+        // (Logic giữ nguyên)
+        if (fromPosition >= 0 && fromPosition < queue.size() &&
+                toPosition >= 0 && toPosition < queue.size()) {
+            ArrayList<Song> queueList = new ArrayList<>(queue);
+            Song song = queueList.remove(fromPosition);
+            queueList.add(toPosition, song);
+            queue.clear();
+            queue.addAll(queueList);
+            if (callback != null) {
+                callback.onQueueUpdated();
+            }
+        }
+    }
+
+    // ========== GETTERS & SETTERS (Cập nhật) ==========
+
     public void seekTo(int position) {
-        if (mediaPlayer != null) {
+        if (mediaPlayer != null && isPlaying) {
             mediaPlayer.seekTo(position);
         }
     }
 
     public int getCurrentPosition() {
-        return mediaPlayer != null ? mediaPlayer.getCurrentPosition() : 0;
+        return (mediaPlayer != null && isPlaying) ? mediaPlayer.getCurrentPosition() : 0;
     }
 
     public int getDuration() {
-        return mediaPlayer != null ? mediaPlayer.getDuration() : 0;
+        return (mediaPlayer != null) ? mediaPlayer.getDuration() : 0;
     }
 
     public boolean isPlaying() {
         return isPlaying;
     }
 
+    /**
+     * CHỈNH SỬA: Trả về 'currentSong' (từ queue hoặc playlist)
+     */
     public Song getCurrentSong() {
-        if (playlist != null && !playlist.isEmpty()
-                && currentSongIndex >= 0 && currentSongIndex < playlist.size()) {
-            return playlist.get(currentSongIndex);
-        }
-        return null;
+        return this.currentSong;
     }
 
-    public int getCurrentSongIndex() {
+    /**
+     * Trả về index của bài hát (trong playlist)
+     * Sẽ trả về -1 nếu đang phát từ queue
+     */
+    public int getCurrentIndex() {
         return currentSongIndex;
     }
 
@@ -226,6 +248,150 @@ public class MusicService extends Service {
         return repeatMode;
     }
 
+
+    // ========== PRIVATE CORE LOGIC ==========
+
+    /**
+     * CHỈNH SỬA: Phát bài hát từ playlist
+     */
+    private void playSong(int index) {
+        if (playlist == null || playlist.isEmpty() || index < 0 || index >= playlist.size()) {
+            Log.e(TAG, "⚠️ Invalid playlist or index");
+            return;
+        }
+
+        currentSongIndex = index;
+        this.currentSong = playlist.get(currentSongIndex); // Cập nhật bài hát hiện tại
+
+        if (this.currentSong == null || this.currentSong.audio == null || this.currentSong.audio.isEmpty()) {
+            Log.e(TAG, "❌ Song has no audio URL. Skipping.");
+            playNext(); // Tự động bỏ qua và phát bài tiếp
+            return;
+        }
+
+        try {
+            if (mediaPlayer == null) {
+                mediaPlayer = new MediaPlayer();
+                mediaPlayer.setAudioAttributes(
+                        new AudioAttributes.Builder()
+                                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                                .setUsage(AudioAttributes.USAGE_MEDIA)
+                                .build()
+                );
+                mediaPlayer.setOnCompletionListener(mp -> handleSongCompletion());
+                mediaPlayer.setOnErrorListener((mp, what, extra) -> {
+                    Log.e(TAG, "MediaPlayer error: " + what);
+                    playNext(); // Thử phát bài tiếp theo nếu có lỗi
+                    return true;
+                });
+            }
+
+            mediaPlayer.reset();
+            mediaPlayer.setDataSource(this.currentSong.audio);
+            mediaPlayer.prepareAsync();
+
+            mediaPlayer.setOnPreparedListener(mp -> {
+                mp.start();
+                isPlaying = true;
+                updateNotification();
+                if (callback != null) {
+                    callback.onPlaybackStateChanged(true);
+                    callback.onSongChanged(this.currentSong, currentSongIndex);
+                }
+                Log.d(TAG, "🎵 Playing from playlist: " + this.currentSong.title);
+            });
+
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Error playing song: " + e.getMessage());
+        }
+    }
+
+    /**
+     * CHỈNH SỬA: Phát bài hát từ queue
+     */
+    private void playQueueSong(Song song) {
+        if (song == null || song.audio == null || song.audio.isEmpty()) {
+            Log.e(TAG, "⚠️ Invalid queue song, skipping.");
+            playNext(); // Thử phát bài tiếp
+            return;
+        }
+
+        this.currentSong = song; // Cập nhật bài hát hiện tại
+        this.currentSongIndex = -1; // Đánh dấu là phát từ queue
+
+        try {
+            if (mediaPlayer == null) {
+                mediaPlayer = new MediaPlayer();
+                mediaPlayer.setAudioAttributes(
+                        new AudioAttributes.Builder()
+                                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                                .setUsage(AudioAttributes.USAGE_MEDIA)
+                                .build()
+                );
+                mediaPlayer.setOnCompletionListener(mp -> handleSongCompletion());
+                mediaPlayer.setOnErrorListener((mp, what, extra) -> {
+                    Log.e(TAG, "MediaPlayer error: " + what);
+                    playNext(); // Thử phát bài tiếp theo nếu có lỗi
+                    return true;
+                });
+            }
+
+            mediaPlayer.reset();
+            mediaPlayer.setDataSource(this.currentSong.audio);
+            mediaPlayer.prepareAsync();
+
+            mediaPlayer.setOnPreparedListener(mp -> {
+                mp.start();
+                isPlaying = true;
+                updateNotification();
+                if (callback != null) {
+                    callback.onPlaybackStateChanged(true);
+                    callback.onSongChanged(this.currentSong, -1); // -1 = từ queue
+                }
+                Log.d(TAG, "🎵 Playing from queue: " + this.currentSong.title);
+            });
+
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Error playing queue song: " + e.getMessage());
+        }
+    }
+
+    /**
+     * CHỈNH SỬA: Xử lý khi kết thúc bài hát (đã sửa lỗi)
+     */
+    private void handleSongCompletion() {
+        if (repeatMode == 2) {
+            // Repeat One: Phát lại chính bài hát vừa xong
+            if (currentSongIndex != -1) {
+                playSong(currentSongIndex); // Phát lại từ playlist
+            } else if (currentSong != null) {
+                playQueueSong(currentSong); // Phát lại bài từ queue
+            }
+        } else if (!queue.isEmpty()) {
+            // Ưu tiên 1: Luôn phát từ queue nếu có
+            playNext(); // playNext() sẽ tự động lấy từ queue
+        } else if (repeatMode == 1) {
+            // Ưu tiên 2: Lặp lại tất cả (và queue rỗng)
+            playNext(); // playNext() sẽ xử lý vòng lặp/xáo trộn
+        } else if (!isShuffle && currentSongIndex == playlist.size() - 1) {
+            // Không lặp, không xáo trộn, và là bài cuối cùng
+            isPlaying = false;
+            currentSong = null;
+            currentSongIndex = -1;
+            if (callback != null) {
+                callback.onPlaybackStateChanged(false);
+                callback.onSongChanged(null, -1); // Gửi null để UI ẩn đi
+            }
+            stopForeground(true); // Dừng thông báo
+        } else {
+            // Mặc định: phát bài tiếp theo
+            playNext();
+        }
+    }
+
+
+    // ========== NOTIFICATION (Giữ nguyên) ==========
+
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
@@ -239,8 +405,11 @@ public class MusicService extends Service {
     }
 
     private void updateNotification() {
-        Song song = getCurrentSong();
-        if (song == null) return;
+        Song song = getCurrentSong(); // Đã được sửa để lấy đúng bài hát
+        if (song == null) {
+            stopForeground(true);
+            return;
+        }
 
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(
@@ -248,11 +417,15 @@ public class MusicService extends Service {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
+        // TODO: Thêm các action Play/Pause/Next vào thông báo
+
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle(song.title)
                 .setContentText(song.artist)
-                .setSmallIcon(android.R.drawable.ic_media_play)
+                .setSmallIcon(R.drawable.ic_music_note) // Thay bằng icon của bạn
+                // .setLargeIcon(bitmap) // Bạn có thể tải ảnh bìa ở đây
                 .setContentIntent(pendingIntent)
+                .setOngoing(isPlaying) // Thông báo không thể bị trượt đi khi đang phát
                 .build();
 
         startForeground(NOTIFICATION_ID, notification);

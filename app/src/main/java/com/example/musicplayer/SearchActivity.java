@@ -21,8 +21,7 @@ import com.example.musicplayer.api.DeezerApi;
 import com.example.musicplayer.api.DeezerSearchResponse;
 import com.example.musicplayer.api.DeezerTrack;
 import com.example.musicplayer.login.LoginActivity;
-import com.example.musicplayer.playlist.PlayerActivity;
-import com.google.gson.JsonObject;
+import com.example.musicplayer.playlist.activity.PlayerActivity;
 
 import java.util.ArrayList;
 

@@ -8,13 +8,11 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <!-- Main Content -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#0D0D0D">
 
-        <!-- Header với gradient -->
         <View
             android:id="@+id/headerOverlay"
             android:layout_width="0dp"
@@ -24,7 +22,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Top Bar -->
         <LinearLayout
             android:id="@+id/topBar"
             android:layout_width="0dp"
@@ -37,7 +34,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
-
             <TextView
                 android:id="@+id/btnMenu"
                 android:layout_width="32dp"
@@ -57,7 +53,30 @@
                 android:textColor="#FFFFFF"
                 android:textSize="20sp"
                 android:textStyle="bold" />
+            <FrameLayout
+                android:id="@+id/btnQueue"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="8dp">
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_queue"
+                    android:layout_gravity="center"
+                    app:tint="#FFFFFF" />
 
+                <TextView
+                    android:id="@+id/tvQueueBadge"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:background="@drawable/badge_background"
+                    android:text="0"
+                    android:textColor="#FFFFFF"
+                    android:textSize="10sp"
+                    android:gravity="center"
+                    android:layout_gravity="top|end"
+                    android:visibility="gone"/>
+            </FrameLayout>
             <ImageView
                 android:id="@+id/btnProfile"
                 android:layout_width="32dp"
@@ -66,7 +85,6 @@
                 android:background="@drawable/circle_background" />
         </LinearLayout>
 
-        <!-- Search Bar -->
         <androidx.cardview.widget.CardView
             android:id="@+id/searchCard"
             android:layout_width="0dp"
@@ -79,23 +97,6 @@
             app:layout_constraintTop_toBottomOf="@id/topBar"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
-
-            <!-- Search Result List -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerSearchResults"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginTop="8dp"
-                android:clipToPadding="false"
-                android:paddingHorizontal="16dp"
-                android:background="#0D0D0D"
-                android:visibility="gone"
-                app:layout_constraintTop_toBottomOf="@id/searchCard"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                tools:listitem="@layout/item_song" />
-
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -125,7 +126,23 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Section Title -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerSearchResults"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            android:clipToPadding="false"
+            android:paddingHorizontal="16dp"
+            android:background="#0D0D0D"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/searchCard"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+
+            app:layout_constraintBottom_toTopOf="@id/miniPlayerFragmentContainer"
+
+            tools:listitem="@layout/item_song" />
+
         <LinearLayout
             android:id="@+id/sectionTitle"
             android:layout_width="0dp"
@@ -138,7 +155,6 @@
             app:layout_constraintTop_toBottomOf="@id/searchCard"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
-
             <TextView
                 android:id="@+id/tvTitle"
                 android:layout_width="0dp"
@@ -148,7 +164,6 @@
                 android:textColor="#FFFFFF"
                 android:textSize="20sp"
                 android:textStyle="bold" />
-
 
             <TextView
                 android:id="@+id/tvSeeAll"
@@ -160,7 +175,6 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Tab Layout -->
         <HorizontalScrollView
             android:id="@+id/tabScrollView"
             android:layout_width="0dp"
@@ -169,7 +183,6 @@
             app:layout_constraintTop_toBottomOf="@id/sectionTitle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
-
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -227,7 +240,6 @@
             </LinearLayout>
         </HorizontalScrollView>
 
-        <!-- RecyclerView -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="0dp"
@@ -236,7 +248,9 @@
             android:clipToPadding="false"
             android:paddingHorizontal="16dp"
             android:paddingBottom="80dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+
+            app:layout_constraintBottom_toTopOf="@id/miniPlayerFragmentContainer"
+
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tabScrollView"
@@ -249,13 +263,27 @@
             android:src="@drawable/robot_2_24px"
             android:padding="20dp"
             app:backgroundTint="#3949AB"
-            app:layout_constraintBottom_toBottomOf="parent"
+
+            app:layout_constraintBottom_toTopOf="@id/miniPlayerFragmentContainer"
+
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_margin="24dp" />
 
+        <FrameLayout
+            android:id="@+id/miniPlayerFragmentContainer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <include layout="@layout/layout_mini_player" />
+
+        </FrameLayout>
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Navigation Drawer -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigationView"
         android:layout_width="280dp"

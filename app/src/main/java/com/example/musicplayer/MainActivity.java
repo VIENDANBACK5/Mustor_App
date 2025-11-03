@@ -1,16 +1,20 @@
 package com.example.musicplayer;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageView;
+import android.widget.ImageButton; // Thêm import
+import android.widget.ImageView; // Thêm import
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,15 +25,15 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide; // Thêm import
 import com.example.musicplayer.api.DeezerApi;
 import com.example.musicplayer.api.DeezerSearchResponse;
 import com.example.musicplayer.api.DeezerTrack;
 import com.example.musicplayer.chatbot.ChatbotActivity;
 import com.example.musicplayer.libary.LibraryActivity;
 import com.example.musicplayer.login.LoginActivity;
-import com.example.musicplayer.playlist.PlayerActivity;
-import com.example.musicplayer.playlist.PlaylistsActivity;
-import com.example.musicplayer.profile.AboutActivity;
+import com.example.musicplayer.playlist.activity.PlayerActivity;
+import com.example.musicplayer.playlist.kienthuc.MusicKnowledgeActivity;
 import com.example.musicplayer.profile.FavoritesActivity;
 import com.example.musicplayer.profile.HistoryActivity;
 import com.example.musicplayer.profile.ProfileActivity;
@@ -38,11 +42,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.gson.JsonObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import retrofit2.Call;
@@ -52,19 +54,20 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, MusicAdapter.OnItemClickListener {
+        implements NavigationView.OnNavigationItemSelectedListener,
+        MusicAdapter.OnItemClickListener,
+        MusicAdapter.OnQueueActionListener {
 
     private static final String TAG = "MainActivity";
     private static final String API_BASE_URL = "http://192.168.30.28:5030/";
-    private static final long SEARCH_DELAY = 500; // 500ms delay for search
+    private static final long SEARCH_DELAY = 500;
 
-    // UI Components
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private RecyclerView recyclerView;
     private EditText etSearchBar;
+    private TextView tvQueueBadge;
 
-    // Data
     private ArrayList<Song> songList;
     private ArrayList<Song> allSongs;
     private MusicAdapter adapter;
@@ -72,9 +75,94 @@ public class MainActivity extends AppCompatActivity
     private LoginActivity.SessionManager sessionManager;
     private LoginActivity.AuthTokenResponse.User currentUser;
 
-    // Search
     private Handler searchHandler = new Handler(Looper.getMainLooper());
     private Runnable searchRunnable;
+
+    // Music Service
+    private MusicService musicService;
+    private boolean serviceBound = false;
+
+    // Biến UI cho Mini-Player
+    private View miniPlayerContainer;
+    private ImageView imgMiniCover;
+    private TextView tvMiniTitle;
+    private TextView tvMiniArtist;
+    private ImageButton btnMiniPlayPause;
+    private ImageButton btnMiniPrevious;
+    private ImageButton btnMiniNext;
+    private ImageButton btnMiniQueue;
+
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MusicService.MusicBinder binder = (MusicService.MusicBinder) service;
+            musicService = binder.getService();
+            musicService.setCallback(new MusicService.MusicServiceCallback() {
+
+                @Override
+                public void onPlaybackStateChanged(boolean isPlaying) {
+                    // Cập nhật nút Play/Pause trên mini-player
+                    runOnUiThread(() -> {
+                        if (isPlaying) {
+                            btnMiniPlayPause.setImageResource(android.R.drawable.ic_media_pause);
+                        } else {
+                            btnMiniPlayPause.setImageResource(android.R.drawable.ic_media_play);
+                        }
+                    });
+                }
+
+                @Override
+                public void onSongChanged(Song song, int position) {
+                    // Cập nhật thông tin bài hát trên mini-player
+                    runOnUiThread(() -> {
+                        if (song != null) {
+                            tvMiniTitle.setText(song.title);
+                            tvMiniArtist.setText(song.artist);
+
+                            if (song.cover != null && !song.cover.isEmpty()) {
+                                Glide.with(MainActivity.this)
+                                        .load(song.cover)
+                                        .placeholder(R.drawable.ic_album_placeholder) // Tạo một placeholder
+                                        .into(imgMiniCover);
+                            } else {
+                                imgMiniCover.setImageResource(R.drawable.ic_album_placeholder);
+                            }
+
+                            // Hiển thị mini-player
+                            miniPlayerContainer.setVisibility(View.VISIBLE);
+                        } else {
+                            // Không có bài hát -> ẩn mini-player
+                            miniPlayerContainer.setVisibility(View.GONE);
+                        }
+                    });
+                }
+
+                @Override
+                public void onProgressChanged(int currentPosition, int duration) {
+                    // Mini-player không cần thanh progress, bỏ qua
+                }
+
+                @Override
+                public void onQueueUpdated() {
+                    runOnUiThread(() -> updateQueueBadge());
+                }
+            });
+            serviceBound = true;
+
+            // Cập nhật UI ngay khi kết nối
+            updateUIFromService();
+            updateQueueBadge();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            serviceBound = false;
+            musicService = null;
+            if (miniPlayerContainer != null) {
+                miniPlayerContainer.setVisibility(View.GONE); // Ẩn đi khi mất kết nối
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,10 +178,53 @@ public class MainActivity extends AppCompatActivity
         setupSearchBar();
         setupTabs();
         setupChatbot();
+        setupQueueButton();
+        setupMiniPlayer(); // Thêm phương thức setup mini-player
 
         loadInitialData();
+        bindMusicService();
     }
 
+    private void bindMusicService() {
+        Intent intent = new Intent(this, MusicService.class);
+        startService(intent);
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    private void setupQueueButton() {
+        View btnQueue = findViewById(R.id.btnQueue);
+        tvQueueBadge = findViewById(R.id.tvQueueBadge);
+
+        btnQueue.setOnClickListener(v -> {
+            Intent intent = new Intent(this, QueueActivity.class);
+            startActivity(intent);
+        });
+    }
+
+    private void updateQueueBadge() {
+        if (musicService != null) {
+            int queueSize = musicService.getQueue().size();
+            if (queueSize > 0) {
+                tvQueueBadge.setVisibility(View.VISIBLE);
+                tvQueueBadge.setText(String.valueOf(queueSize));
+            } else {
+                tvQueueBadge.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    @Override
+    public void onAddToQueue(Song song) {
+        if (serviceBound && musicService != null) {
+            musicService.addToQueue(song);
+            Toast.makeText(this, "Đã thêm vào hàng đợi: " + song.title, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Music service not available", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // (Các phương thức setupRetrofit, loadInitialData, loadUserProfile, v.v... giữ nguyên)
+    // ...
     private void setupRetrofit() {
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .addInterceptor(chain -> {
@@ -124,7 +255,7 @@ public class MainActivity extends AppCompatActivity
         deezerApi.getMe().enqueue(new Callback<LoginActivity.AuthTokenResponse.User>() {
             @Override
             public void onResponse(@NonNull Call<LoginActivity.AuthTokenResponse.User> call,
-                    @NonNull Response<LoginActivity.AuthTokenResponse.User> response) {
+                                   @NonNull Response<LoginActivity.AuthTokenResponse.User> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     currentUser = response.body();
                     updateDrawerHeader();
@@ -151,7 +282,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void loadRecommendedSongs() {
-        // Use Deezer chart instead of recommendations
         deezerApi.getChart(20).enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
@@ -194,11 +324,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void searchSongs(String query) {
-        // Use Deezer search API with query params
         deezerApi.searchTracks(query, 20, 0).enqueue(new Callback<DeezerSearchResponse>() {
             @Override
             public void onResponse(@NonNull Call<DeezerSearchResponse> call,
-                    @NonNull Response<DeezerSearchResponse> response) {
+                                   @NonNull Response<DeezerSearchResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     updateSongList(response.body().tracks);
                 }
@@ -221,32 +350,115 @@ public class MainActivity extends AppCompatActivity
         allSongs.addAll(songList);
         adapter.notifyDataSetChanged();
     }
+    // ...
 
-    @Override
-    public void onItemClick(String trackId) {
-        ArrayList<String> playlistTitles = new ArrayList<>();
-        ArrayList<String> playlistArtists = new ArrayList<>();
-        ArrayList<String> playlistCovers = new ArrayList<>();
-        ArrayList<String> playlistPreviews = new ArrayList<>();
-        ArrayList<String> playlistIds = new ArrayList<>();
-        ArrayList<Integer> playlistDurations = new ArrayList<>();
-        int clickedIndex = -1;
+    /**
+     * PHƯƠNG THỨC MỚI: Khởi tạo các view và listener cho Mini-Player
+     */
+    /**
+     * PHƯƠNG THỨC MỚI: Khởi tạo các view và listener cho Mini-Player
+     * (Đã được viết lại hoàn chỉnh)
+     */
+    private void setupMiniPlayer() {
+        miniPlayerContainer = findViewById(R.id.miniPlayerContainer);
+        imgMiniCover = findViewById(R.id.imgMiniCover);
+        tvMiniTitle = findViewById(R.id.tvMiniTitle);
+        tvMiniArtist = findViewById(R.id.tvMiniArtist);
 
-        for (int i = 0; i < songList.size(); i++) {
-            Song song = songList.get(i);
-            playlistTitles.add(song.title);
-            playlistArtists.add(song.artist);
-            playlistCovers.add(song.cover);
-            playlistPreviews.add(song.audio != null ? song.audio : "");
-            playlistIds.add(song.id);
-            playlistDurations.add(song.durationMs);
+        // Các nút điều khiển
+        btnMiniPlayPause = findViewById(R.id.btnMiniPlayPause);
+        btnMiniPrevious = findViewById(R.id.btnMiniPrevious); // Nút mới
+        btnMiniNext = findViewById(R.id.btnMiniNext);       // Nút mới
+        btnMiniQueue = findViewById(R.id.btnMiniQueue);     // Nút mới
 
-            if (song.id.equals(trackId)) {
-                clickedIndex = i;
+        // Ban đầu ẩn đi
+        miniPlayerContainer.setVisibility(View.GONE);
+
+        // Click vào toàn bộ mini-player -> mở PlayerActivity
+        miniPlayerContainer.setOnClickListener(v -> openPlayerActivityFromMiniPlayer());
+
+        // Click vào nút play/pause
+        btnMiniPlayPause.setOnClickListener(v -> {
+            if (serviceBound && musicService != null) {
+                musicService.togglePlayPause();
+            }
+        });
+
+        // GÁN LISTENER CHO CÁC NÚT MỚI:
+
+        // Click vào nút Previous
+        btnMiniPrevious.setOnClickListener(v -> {
+            if (serviceBound && musicService != null) {
+                musicService.playPrevious(); // Gọi hàm của service
+            }
+        });
+
+        // Click vào nút Next
+        btnMiniNext.setOnClickListener(v -> {
+            if (serviceBound && musicService != null) {
+                musicService.playNext(); // Gọi hàm của service
+            }
+        });
+
+        // Click vào nút Queue
+        btnMiniQueue.setOnClickListener(v -> {
+            // Mở QueueActivity (giống hệt nút ở top bar)
+            Intent intent = new Intent(MainActivity.this, QueueActivity.class);
+            startActivity(intent);
+        });
+    }
+
+    /**
+     * PHƯƠNG THỨC MỚI: Cập nhật UI mini-player dựa trên trạng thái HIỆN TẠI của service.
+     */
+    private void updateUIFromService() {
+        if (serviceBound && musicService != null) {
+            // Giả sử MusicService có các phương thức này
+            Song currentSong = musicService.getCurrentSong();
+            boolean isPlaying = musicService.isPlaying();
+
+            if (currentSong != null) {
+                // Gọi lại các callback để đồng bộ UI
+                musicService.getCallback().onSongChanged(currentSong, musicService.getCurrentIndex());
+                musicService.getCallback().onPlaybackStateChanged(isPlaying);
+                miniPlayerContainer.setVisibility(View.VISIBLE);
+            } else {
+                miniPlayerContainer.setVisibility(View.GONE);
             }
         }
+    }
 
-        if (clickedIndex != -1) {
+    /**
+     * PHƯƠNG THỨC MỚI: Mở PlayerActivity dựa trên trạng thái của Service.
+     */
+    private void openPlayerActivityFromMiniPlayer() {
+        if (serviceBound && musicService != null && musicService.getCurrentSong() != null) {
+            // Lấy playlist VÀ index hiện tại từ Service
+            ArrayList<Song> currentPlaylist = musicService.getPlaylist();
+            int currentIndex = musicService.getCurrentIndex();
+
+            if (currentPlaylist == null || currentPlaylist.isEmpty()) {
+                Toast.makeText(this, "Lỗi: Không tìm thấy playlist", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Xây dựng lại Intent Extras như cũ
+            ArrayList<String> playlistTitles = new ArrayList<>();
+            ArrayList<String> playlistArtists = new ArrayList<>();
+            ArrayList<String> playlistCovers = new ArrayList<>();
+            ArrayList<String> playlistPreviews = new ArrayList<>();
+            ArrayList<String> playlistIds = new ArrayList<>();
+            ArrayList<Integer> playlistDurations = new ArrayList<>();
+
+            for (Song song : currentPlaylist) {
+                playlistTitles.add(song.title);
+                playlistArtists.add(song.artist);
+                playlistCovers.add(song.cover);
+                playlistPreviews.add(song.audio != null ? song.audio : "");
+                playlistIds.add(song.id);
+                playlistDurations.add(song.durationMs);
+            }
+
             Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
             intent.putStringArrayListExtra("playlist_titles", playlistTitles);
             intent.putStringArrayListExtra("playlist_artists", playlistArtists);
@@ -254,8 +466,47 @@ public class MainActivity extends AppCompatActivity
             intent.putStringArrayListExtra("playlist_previews", playlistPreviews);
             intent.putStringArrayListExtra("playlist_ids", playlistIds);
             intent.putIntegerArrayListExtra("playlist_durations", playlistDurations);
-            intent.putExtra("current_index", clickedIndex);
+            intent.putExtra("current_index", currentIndex);
+
+            // Cờ này để báo cho PlayerActivity biết là chỉ cần "nối lại"
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+
             startActivity(intent);
+
+        } else {
+            Toast.makeText(this, "Không có nhạc để phát", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+    /**
+     * ĐÃ REFACTOR: onClick trên item của RecyclerView
+     */
+    @Override
+    public void onItemClick(String trackId) {
+        if (!serviceBound) {
+            Toast.makeText(this, "Dịch vụ chưa sẵn sàng", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Tìm index của bài hát được click từ songList hiện tại
+        int clickedIndex = -1;
+        for (int i = 0; i < songList.size(); i++) {
+            if (songList.get(i).id.equals(trackId)) {
+                clickedIndex = i;
+                break;
+            }
+        }
+
+        if (clickedIndex != -1) {
+            // 1. YÊU CẦU SERVICE PHÁT PLAYLIST MỚI
+            // (Bạn cần thêm phương thức này vào MusicService)
+            musicService.setPlaylist(new ArrayList<>(songList), clickedIndex);
+
+            // 2. Mở PlayerActivity
+            // Phương thức này sẽ lấy playlist TỪ SERVICE và mở
+            openPlayerActivityFromMiniPlayer();
+
         } else {
             Toast.makeText(this, "Could not find the clicked song.", Toast.LENGTH_SHORT).show();
         }
@@ -268,6 +519,7 @@ public class MainActivity extends AppCompatActivity
         allSongs = new ArrayList<>();
         adapter = new MusicAdapter(this, songList);
         adapter.setOnItemClickListener(this);
+        adapter.setOnQueueActionListener(this);
         recyclerView.setAdapter(adapter);
     }
 
@@ -316,7 +568,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_favorites) {
             startActivity(new Intent(this, FavoritesActivity.class));
         } else if (id == R.id.nav_playlists) {
-            startActivity(new Intent(this, PlaylistsActivity.class));
+            startActivity(new Intent(this, MusicKnowledgeActivity.class));
         } else if (id == R.id.nav_history) {
             startActivity(new Intent(this, HistoryActivity.class));
         }
@@ -329,8 +581,7 @@ public class MainActivity extends AppCompatActivity
         etSearchBar = findViewById(R.id.etSearch);
         etSearchBar.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -350,8 +601,7 @@ public class MainActivity extends AppCompatActivity
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
-            }
+            public void afterTextChanged(Editable s) {}
         });
     }
 
@@ -407,6 +657,23 @@ public class MainActivity extends AppCompatActivity
         if (etSearchBar != null) {
             etSearchBar.setText("");
             etSearchBar.clearFocus();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Cập nhật queue và mini-player khi quay lại
+        updateQueueBadge();
+        updateUIFromService();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (serviceBound) {
+            unbindService(serviceConnection);
+            serviceBound = false;
         }
     }
 

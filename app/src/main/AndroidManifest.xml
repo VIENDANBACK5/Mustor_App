@@ -4,6 +4,10 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
+
 
     <application
         android:allowBackup="true"
@@ -13,6 +17,7 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+
 
         <!-- Login is the launcher -->
         <activity
@@ -28,12 +33,17 @@
         <!-- ADDED: RegisterActivity declaration -->
         <activity
             android:name=".login.RegisterActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="fullSensor"
+            tools:ignore="DiscouragedApi" />
+
+        <activity android:name=".QueueActivity" />
+
 
         <!-- Main screen -->
         <activity
             android:name=".MainActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi" />
 
         <activity
             android:name=".SearchActivity"
@@ -43,13 +53,13 @@
         <activity android:name=".profile.ProfileActivity" />
         <activity android:name=".libary.LibraryActivity" />
         <activity android:name=".profile.FavoritesActivity" />
-        <activity android:name=".playlist.PlaylistsActivity" />
+        <activity android:name=".playlist.kienthuc.MusicKnowledgeActivity" />
         <activity android:name=".profile.HistoryActivity" />
         <activity android:name=".profile.SettingsActivity" />
         <activity android:name=".profile.AboutActivity" />
 
         <activity
-            android:name=".playlist.PlayerActivity"
+            android:name=".playlist.activity.PlayerActivity"
             android:screenOrientation="portrait" />
 
         <service

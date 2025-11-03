@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.PopupMenu;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,13 +22,22 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.ViewHolder> 
     private final Context context;
     private final List<Song> songs;
     private OnItemClickListener listener;
+    private OnQueueActionListener queueListener;
 
     public interface OnItemClickListener {
         void onItemClick(String trackId);
     }
 
+    public interface OnQueueActionListener {
+        void onAddToQueue(Song song);
+    }
+
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
+    }
+
+    public void setOnQueueActionListener(OnQueueActionListener listener) {
+        this.queueListener = listener;
     }
 
     public MusicAdapter(Context context, List<Song> songs) {
@@ -45,7 +55,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Song song = songs.get(position);
-        holder.bind(song, listener);
+        holder.bind(song, listener, queueListener);
     }
 
     @Override
@@ -69,11 +79,12 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.ViewHolder> 
             btnMore = itemView.findViewById(R.id.btnMore);
         }
 
-        public void bind(final Song song, final OnItemClickListener listener) {
+        public void bind(final Song song, final OnItemClickListener listener,
+                         final OnQueueActionListener queueListener) {
             tvRank.setText(String.valueOf(getAdapterPosition() + 1));
             tvSongTitle.setText(song.title);
             tvArtist.setText(song.artist);
-            tvDuration.setText("0:30"); // Default preview duration
+            tvDuration.setText("0:30");
 
             if (getAdapterPosition() < 3) {
                 tvRank.setTextColor(0xFFFFD700);
@@ -86,10 +97,30 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.ViewHolder> 
                     .apply(new RequestOptions().transform(new RoundedCorners(16)))
                     .into(ivAlbumCover);
 
+            // Click vào item để phát
             itemView.setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onItemClick(song.id);
                 }
+            });
+
+            // Menu với tùy chọn Add to Queue
+            btnMore.setOnClickListener(v -> {
+                PopupMenu popup = new PopupMenu(v.getContext(), v);
+                popup.getMenu().add("Add to Queue");
+                popup.getMenu().add("Add to Playlist");
+                popup.getMenu().add("Share");
+
+                popup.setOnMenuItemClickListener(item -> {
+                    String title = item.getTitle().toString();
+                    if (title.equals("Add to Queue") && queueListener != null) {
+                        queueListener.onAddToQueue(song);
+                        return true;
+                    }
+                    return false;
+                });
+
+                popup.show();
             });
         }
     }
