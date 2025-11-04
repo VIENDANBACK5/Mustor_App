@@ -125,7 +125,7 @@
             android:layout_width="120dp"
             android:layout_height="120dp"
             android:src="@android:drawable/btn_star_big_off"
-            android:tint="#333333"
+            app:tint="#333333"
             android:alpha="0.5" />
 
         <TextView
@@ -138,49 +138,6 @@
             android:textSize="18sp"
             android:textStyle="bold"
             android:gravity="center" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Nhấn vào nút ❤️ khi nghe nhạc\nđể thêm bài hát vào đây"
-            android:textColor="#555555"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:lineSpacingExtra="4dp" />
-
-        <!-- Decorative hearts -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:orientation="horizontal"
-            android:gravity="center">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="❤️"
-                android:textSize="20sp"
-                android:alpha="0.3"
-                android:layout_marginHorizontal="8dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="💙"
-                android:textSize="24sp"
-                android:alpha="0.4"
-                android:layout_marginHorizontal="8dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="💚"
-                android:textSize="20sp"
-                android:alpha="0.3"
-                android:layout_marginHorizontal="8dp" />
-        </LinearLayout>
     </LinearLayout>
 
 </RelativeLayout>

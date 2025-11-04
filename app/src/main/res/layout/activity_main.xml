@@ -52,7 +52,8 @@
                 android:text="@string/app_name"
                 android:textColor="#FFFFFF"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                />
             <FrameLayout
                 android:id="@+id/btnQueue"
                 android:layout_width="40dp"
@@ -262,8 +263,6 @@
             android:layout_height="wrap_content"
             android:src="@drawable/robot_2_24px"
             android:padding="20dp"
-            app:backgroundTint="#3949AB"
-
             app:layout_constraintBottom_toTopOf="@id/miniPlayerFragmentContainer"
 
             app:layout_constraintEnd_toEndOf="parent"
@@ -284,6 +283,8 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+
+
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigationView"
         android:layout_width="280dp"
@@ -293,7 +294,8 @@
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header"
         app:menu="@menu/nav_menu"
-        app:itemIconTint="@color/white"
-        app:itemTextColor="@color/white" />
+        app:itemIconTint="@color/nav_item_text"
+        app:itemTextColor="@color/nav_item_text"
+        app:itemBackground="@drawable/nav_item_background"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>

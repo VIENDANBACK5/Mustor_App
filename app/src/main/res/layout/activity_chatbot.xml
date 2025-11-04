@@ -85,7 +85,7 @@
         <ImageView
             android:layout_width="120dp"
             android:layout_height="120dp"
-            android:src="@android:drawable/ic_dialog_info"
+            android:src="@drawable/robot_2_24px"
             app:tint="#444444"
             android:alpha="0.5" />
 

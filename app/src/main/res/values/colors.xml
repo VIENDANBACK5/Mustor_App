@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Màu cơ bản -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="theme">#3949AB</color>
+
+    <!-- Màu chủ đạo -->
+    <color name="theme">#3949AB</color> <!-- Indigo 600 -->
+
+    <!-- Màu nhạt hơn (dùng làm nền khi item được chọn) -->
+    <color name="theme_100">#C5CAE9</color> <!-- Indigo 100 -->
+
+    <!-- Màu trung bình sáng (hover, pressed) -->
+    <color name="theme_200">#9FA8DA</color> <!-- Indigo 200 -->
+
+    <!-- Màu đậm hơn (header, button) -->
+    <color name="theme_dark">#283593</color> <!-- Indigo 800 -->
+
+    <!-- Màu chữ -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#BDBDBD</color>
 </resources>
