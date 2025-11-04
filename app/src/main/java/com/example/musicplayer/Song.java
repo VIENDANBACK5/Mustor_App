@@ -11,9 +11,11 @@ public class Song {
     public int durationMs; // Độ dài bài hát (ms)
     public int popularity; // Độ phổ biến
     public String deezerUrl; // Link Deezer
+    public String preview;
 
+    // Constructor đầy đủ (10 tham số)
     public Song(String id, String title, String artist, String cover, String audio, String lyrics, String albumName,
-            int durationMs, int popularity, String deezerUrl) {
+                int durationMs, int popularity, String deezerUrl) {
         this.id = id;
         this.title = title;
         this.artist = artist;
@@ -25,4 +27,22 @@ public class Song {
         this.popularity = popularity;
         this.deezerUrl = deezerUrl;
     }
+
+    public Song(String id, String title, String artist, String cover, String audio, int durationMs) {
+        this.id = id;
+        this.title = title;
+        this.artist = artist;
+        this.cover = cover;
+        this.audio = audio; // 'preview' từ PlayerActivity sẽ được gán vào 'audio'
+        this.durationMs = durationMs;
+
+        // Gán giá trị mặc định
+        this.lyrics = "";
+        this.albumName = "";
+        this.popularity = 0;
+        this.deezerUrl = "";
+    }
+
+    // THÊM MỚI: Constructor rỗng (rất quan trọng cho nhiều thư viện)
+    public Song() { }
 }

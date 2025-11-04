@@ -88,6 +88,59 @@ public class MusicService extends Service {
     }
 
     /**
+     * THÊM MỚI: Phát một bài hát cụ thể (dùng cho MiniPlayer khi thoát PlayerActivity)
+     * Đây là phương thức mà PlayerActivity cần gọi trong showMiniPlayer()
+     */
+    public void play(Song song) {
+        if (song == null || song.audio == null || song.audio.isEmpty()) {
+            Log.e(TAG, "⚠️ Invalid song to play, skipping.");
+            return;
+        }
+
+        this.currentSong = song; // Cập nhật bài hát hiện tại
+        // Đặt index = -1 để báo hiệu đây là một bài hát đơn lẻ (không thuộc playlist)
+        // giống như cách bạn xử lý queue.
+        this.currentSongIndex = -1;
+
+        try {
+            if (mediaPlayer == null) {
+                mediaPlayer = new MediaPlayer();
+                mediaPlayer.setAudioAttributes(
+                        new AudioAttributes.Builder()
+                                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                                .setUsage(AudioAttributes.USAGE_MEDIA)
+                                .build()
+                );
+                mediaPlayer.setOnCompletionListener(mp -> handleSongCompletion());
+                mediaPlayer.setOnErrorListener((mp, what, extra) -> {
+                    Log.e(TAG, "MediaPlayer error: " + what);
+                    playNext(); // Thử phát bài tiếp theo nếu có lỗi
+                    return true;
+                });
+            }
+
+            mediaPlayer.reset();
+            mediaPlayer.setDataSource(this.currentSong.audio);
+            mediaPlayer.prepareAsync();
+
+            mediaPlayer.setOnPreparedListener(mp -> {
+                mp.start();
+                isPlaying = true;
+                updateNotification();
+                if (callback != null) {
+                    callback.onPlaybackStateChanged(true);
+                    callback.onSongChanged(this.currentSong, -1); // -1 = bài hát đơn
+                }
+                Log.d(TAG, "🎵 Playing single song: " + this.currentSong.title);
+            });
+
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Error playing single song: " + e.getMessage());
+        }
+    }
+
+
+    /**
      * CHỈNH SỬA: Đổi tên từ playPause() -> togglePlayPause()
      */
     public void togglePlayPause() {
@@ -105,6 +158,36 @@ public class MusicService extends Service {
             if (callback != null) callback.onPlaybackStateChanged(isPlaying);
         } catch (Exception e) {
             Log.e(TAG, "Error togglePlayPause: " + e.getMessage());
+        }
+    }
+
+    /**
+     * THÊM MỚI: Tạm dừng nhạc (dùng cho PlayerActivity khi ẩn MiniPlayer)
+     * Đây là phương thức mà PlayerActivity cần gọi trong hideMiniPlayer()
+     */
+    public void pause() {
+        if (mediaPlayer != null) {
+            try {
+                // Nếu nó đang phát, tạm dừng.
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.pause();
+                }
+
+                // QUAN TRỌNG: Nếu nó đang "preparing", lệnh reset()
+                // sẽ hủy tiến trình đó và ngăn onPreparedListener
+                // tự động phát nhạc.
+                mediaPlayer.reset();
+
+                isPlaying = false;
+                updateNotification(); // Cập nhật thông báo (nếu cần)
+                if (callback != null) callback.onPlaybackStateChanged(false);
+                Log.d(TAG, "⏸️ Music reset/paused by external request");
+
+            } catch (Exception e) {
+                // Có thể ném lỗi nếu reset() được gọi ở trạng thái không phù hợp,
+                // nhưng nó an toàn trong trường hợp này.
+                Log.e(TAG, "Error aggressive pause/reset: " + e.getMessage());
+            }
         }
     }
 
