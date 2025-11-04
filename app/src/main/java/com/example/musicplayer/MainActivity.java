@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity
         setupRetrofit();
         setupDrawer();
         setupRecyclerView();
-//        setupTopBar();
+        setupTopBar();
         setupSearchBar();
         setupTabs();
         setupChatbot();
@@ -552,9 +552,12 @@ public class MainActivity extends AppCompatActivity
         findViewById(R.id.btnMenu).setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
     }
 
-//    private void setupTopBar() {
-//        findViewById(R.id.btnProfile).setOnClickListener(v -> openProfile());
-//    }
+    private void setupTopBar() {
+        findViewById(R.id.btnProfile).setOnClickListener(v -> {
+            Intent intent = new Intent(this, ProfileActivity.class);
+            startActivity(intent);
+        });
+    }
 //
 //    private void openProfile() {
 //        if (currentUser != null) {
