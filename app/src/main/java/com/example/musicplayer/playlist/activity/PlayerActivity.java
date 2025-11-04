@@ -385,14 +385,26 @@ public class PlayerActivity extends AppCompatActivity
             if (mediaPlayer == null || isPreparing) return;
             try {
                 if (isPlaying) {
+                    // --- Đang phát -> Dừng ---
                     mediaPlayer.pause();
                     uiHelper.stopDiscAnimation();
+
+                    // ⭐ SỬA LỖI: Chủ động dừng vòng lặp cập nhật seekbar
+                    stopSeekBarUpdater();
+
                 } else {
+                    // --- Đang dừng -> Phát ---
                     mediaPlayer.start();
                     uiHelper.startDiscAnimation();
+
+                    // ⭐ SỬA LỖI: Bắt đầu lại vòng lặp cập nhật seekbar
+                    startSeekBarUpdater();
                 }
+
+                // Cập nhật trạng thái
                 isPlaying = !isPlaying;
                 uiHelper.updatePlayPauseButton(isPlaying);
+
                 // Hiệu ứng click
                 v.animate().scaleX(0.85f).scaleY(0.85f).setDuration(100)
                         .withEndAction(() -> v.animate().scaleX(1f).scaleY(1f).setDuration(100).start())
@@ -401,6 +413,8 @@ public class PlayerActivity extends AppCompatActivity
                 Log.e(TAG, "Play/Pause Error: " + e.getMessage());
             }
         });
+
+        // (Các nút bên dưới được giữ nguyên như code gốc của bạn)
 
         uiHelper.btnNext.setOnClickListener(v -> {
             uiHelper.animateButton(v);
@@ -531,7 +545,13 @@ public class PlayerActivity extends AppCompatActivity
         }
     }
 
+    // Hàm này bạn đã có
     private void startSeekBarUpdater() {
+        // ⭐ SỬA LẠI: Luôn hủy các callback cũ trước khi tạo cái mới
+        if (handler != null && updateSeekBar != null) {
+            handler.removeCallbacks(updateSeekBar);
+        }
+
         updateSeekBar = new Runnable() {
             @Override
             public void run() {
@@ -540,7 +560,11 @@ public class PlayerActivity extends AppCompatActivity
                         int currentPos = mediaPlayer.getCurrentPosition();
                         uiHelper.updateSeekBar(currentPos, -1);
                         uiHelper.updateTimers(currentPos, -1);
-                        handler.postDelayed(this, 500);
+
+                        // Chỉ gọi lại nếu vẫn đang phát
+                        if (isPlaying) {
+                            handler.postDelayed(this, 500);
+                        }
                     } catch (Exception e) {
                         Log.e(TAG, "Update error: " + e.getMessage());
                     }
@@ -548,6 +572,15 @@ public class PlayerActivity extends AppCompatActivity
             }
         };
         handler.post(updateSeekBar);
+    }
+
+    /**
+     * ⭐ HÀM MỚI: Chủ động dừng vòng lặp cập nhật seekbar
+     */
+    private void stopSeekBarUpdater() {
+        if (handler != null && updateSeekBar != null) {
+            handler.removeCallbacks(updateSeekBar);
+        }
     }
 
     @Override

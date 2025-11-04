@@ -458,7 +458,7 @@ public class MusicService extends Service {
     }
 
     /**
-     * CHỈNH SỬA: Xử lý khi kết thúc bài hát (đã sửa lỗi)
+     * CHỈNH SỬA: Xử lý khi kết thúc bài hát (đã sửa lỗi 'đơ' nút bấm)
      */
     private void handleSongCompletion() {
         if (repeatMode == 2) {
@@ -466,6 +466,7 @@ public class MusicService extends Service {
             if (currentSongIndex != -1) {
                 playSong(currentSongIndex); // Phát lại từ playlist
             } else if (currentSong != null) {
+                // (Kiểm tra null cho an toàn)
                 playQueueSong(currentSong); // Phát lại bài từ queue
             }
         } else if (!queue.isEmpty()) {
@@ -474,22 +475,45 @@ public class MusicService extends Service {
         } else if (repeatMode == 1) {
             // Ưu tiên 2: Lặp lại tất cả (và queue rỗng)
             playNext(); // playNext() sẽ xử lý vòng lặp/xáo trộn
-        } else if (!isShuffle && currentSongIndex == playlist.size() - 1) {
-            // Không lặp, không xáo trộn, và là bài cuối cùng
+        }
+
+        // ⭐ SỬA LỖI: Tách logic bài cuối cùng ra
+        // (Áp dụng khi (Không lặp) VÀ (Không xáo trộn) VÀ (Đang ở bài cuối))
+        else if (repeatMode == 0 && !isShuffle && currentSongIndex == playlist.size() - 1)
+        {
+            // Đã phát xong bài cuối cùng, và không lặp lại.
+            Log.d(TAG, "Playlist finished. Pausing at end.");
             isPlaying = false;
-            currentSong = null;
-            currentSongIndex = -1;
+
+            // QUAN TRỌNG: ĐỪNG ĐẶT currentSong = null
+            // currentSong = null; // <-- XÓA DÒNG NÀY
+
+            // Thay vào đó, chỉ cập nhật UI và tua về 0
             if (callback != null) {
                 callback.onPlaybackStateChanged(false);
-                callback.onSongChanged(null, -1); // Gửi null để UI ẩn đi
             }
-            stopForeground(true); // Dừng thông báo
-        } else {
-            // Mặc định: phát bài tiếp theo
+
+            try {
+                if (mediaPlayer != null) {
+                    mediaPlayer.seekTo(0);
+                    // Báo cho UI biết là đã về 0
+                    if (callback != null) {
+                        callback.onProgressChanged(0, mediaPlayer.getDuration());
+                    }
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Seek to 0 on completion failed: " + e.getMessage());
+            }
+
+            // Dừng, nhưng đừng hủy, để nó có thể được phát lại
+            stopForeground(false); // 'false' = giữ notification lại
+        }
+
+        // Mặc định: phát bài tiếp theo
+        else {
             playNext();
         }
     }
-
 
     // ========== NOTIFICATION (Giữ nguyên) ==========
 

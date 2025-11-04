@@ -107,8 +107,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.ViewHolder> 
             // Menu với tùy chọn Add to Queue
             btnMore.setOnClickListener(v -> {
                 PopupMenu popup = new PopupMenu(v.getContext(), v);
-                popup.getMenu().add("Add to Queue");
-                popup.getMenu().add("Add to Playlist");
+                popup.getMenu().add("Add to  Playlist");
                 popup.getMenu().add("Share");
 
                 popup.setOnMenuItemClickListener(item -> {

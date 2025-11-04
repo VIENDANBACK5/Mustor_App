@@ -378,10 +378,7 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * PHƯƠNG THỨC MỚI: Khởi tạo các view và listener cho Mini-Player
-     */
-    /**
-     * PHƯƠNG THỨC MỚI: Khởi tạo các view và listener cho Mini-Player
-     * (Đã được viết lại hoàn chỉnh)
+     * (Đã tích hợp logic cho nút "X" - btnMiniClose)
      */
     private void setupMiniPlayer() {
         miniPlayerContainer = findViewById(R.id.miniPlayerContainer);
@@ -391,12 +388,18 @@ public class MainActivity extends AppCompatActivity
 
         // Các nút điều khiển
         btnMiniPlayPause = findViewById(R.id.btnMiniPlayPause);
-        btnMiniPrevious = findViewById(R.id.btnMiniPrevious); // Nút mới
-        btnMiniNext = findViewById(R.id.btnMiniNext);       // Nút mới
-        btnMiniQueue = findViewById(R.id.btnMiniQueue);     // Nút mới
+        btnMiniPrevious = findViewById(R.id.btnMiniPrevious);
+        btnMiniNext = findViewById(R.id.btnMiniNext);
+        btnMiniQueue = findViewById(R.id.btnMiniQueue);
+
+        // ⭐ TÍCH HỢP: Tìm nút "X" (Close)
+        // (Hãy đảm bảo ID này khớp với file layout XML của bạn)
+        ImageButton btnMiniClose = findViewById(R.id.btnMiniClose);
 
         // Ban đầu ẩn đi
         miniPlayerContainer.setVisibility(View.GONE);
+
+        // --- Gán sự kiện Click ---
 
         // Click vào toàn bộ mini-player -> mở PlayerActivity
         miniPlayerContainer.setOnClickListener(v -> openPlayerActivityFromMiniPlayer());
@@ -428,6 +431,28 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(MainActivity.this, QueueActivity.class);
             startActivity(intent);
         });
+
+        // ⭐ TÍCH HỢP: Gán sự kiện click cho nút "X"
+        if (btnMiniClose != null) {
+            btnMiniClose.setOnClickListener(v -> {
+                if (serviceBound && musicService != null) {
+
+                    // 1. Dừng nhạc (hàm pause() mạnh đã có reset())
+                    musicService.pause();
+
+                    // 2. Ẩn giao diện MiniPlayer
+                    miniPlayerContainer.setVisibility(View.GONE);
+
+                    // 3. Dừng Service hoàn toàn (để xóa notification)
+                    Intent stopIntent = new Intent(MainActivity.this, MusicService.class);
+                    stopService(stopIntent);
+                }
+            });
+        } else {
+            // Ghi log cảnh báo nếu không tìm thấy nút, giúp bạn debug
+            Log.w(TAG, "setupMiniPlayer: btnMiniClose (nút 'X') không được tìm thấy."
+                    + " Hãy kiểm tra ID trong file XML layout của mini-player.");
+        }
     }
 
     /**
