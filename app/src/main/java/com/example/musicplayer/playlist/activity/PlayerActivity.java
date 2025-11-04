@@ -30,6 +30,7 @@ public class PlayerActivity extends AppCompatActivity
         implements FavoritesManager.FavoritesChangeListener {
 
     private static final String TAG = "PlayerActivity";
+    private int startPositionMs = 0;
 
     // UI (Được quản lý bởi Helper)
     private PlayerUIHelper uiHelper;
@@ -42,6 +43,7 @@ public class PlayerActivity extends AppCompatActivity
     private int repeatMode = 0;
     private Handler handler = new Handler();
     private Runnable updateSeekBar;
+    private int lastPlaybackPosition = 0;
 
     // ⭐ SỬA LỖI NHẢY BÀI: Thêm cờ (flag) để theo dõi lần tải đầu tiên
     private boolean isFirstLoad = true;
@@ -103,6 +105,14 @@ public class PlayerActivity extends AppCompatActivity
         Log.d(TAG, "🚀 PlayerActivity onCreate() started");
         setContentView(R.layout.activity_player);
 
+        // ⭐ BÀN GIAO THỜI GIAN (Hand-off)
+        // Lấy vị trí bắt đầu từ Intent mà MainActivity gửi sang
+        startPositionMs = getIntent().getIntExtra("start_position_ms", 0);
+        if (startPositionMs > 0) {
+            Log.d(TAG, "Received start position: " + startPositionMs + "ms");
+        }
+        // ⭐ KẾT THÚC BÀN GIAO
+
         // Khởi tạo Managers
         sessionManager = new LoginActivity.SessionManager(this);
         historyManager = new HistoryManager(this);
@@ -116,21 +126,13 @@ public class PlayerActivity extends AppCompatActivity
         }
 
         // Khởi tạo Helpers
-        uiHelper = new PlayerUIHelper(this); // UI Helper có thể tạo ở đây
+        uiHelper = new PlayerUIHelper(this);
         deezerApi = PlayerNetworkHelper.setupRetrofit(sessionManager, this::redirectToLogin);
-
-        // Tải dữ liệu và cài đặt
-        // SẼ ĐƯỢC GỌI TRONG onServiceConnected() ĐỂ TRÁNH ĐÈ NHẠC
-        // loadPlaylistData();
-        // loadCurrentSong();
-        // setupMediaPlayer();
-        // setupControls();
 
         // Bắt đầu kết nối service
         bindMusicService();
 
-        // (Lệnh hideMiniPlayer() ở đây có thể chạy quá sớm,
-        // nhưng đã có 1 lệnh đảm bảo trong onServiceConnected)
+        // (Lệnh hideMiniPlayer() đã có trong onServiceConnected)
         hideMiniPlayer();
 
         Log.d(TAG, "✅ PlayerActivity onCreate() completed (waiting for service)");
@@ -215,24 +217,19 @@ public class PlayerActivity extends AppCompatActivity
         String audioUrl = song.audio;
         Log.d(TAG, "Setup MediaPlayer: " + audioUrl);
 
-        // ⭐ SỬA LỖI NHẢY BÀI: Thay đổi logic xử lý URL rỗng
+        // (Logic xử lý lỗi URL rỗng của bạn...)
         if (audioUrl == null || audioUrl.isEmpty()) {
             if (isFirstLoad) {
-                // Nếu đây là bài hát đầu tiên (bài người dùng nhấn vào) và nó bị lỗi
-                // -> Hiển thị lỗi và thoát, không tự động chuyển bài
                 Log.e(TAG, "Cannot play: No audio URL for the first song.");
                 Toast.makeText(this, "Không thể phát: Bài hát không có URL nhạc.", Toast.LENGTH_LONG).show();
-                finish(); // Quay lại danh sách
+                finish();
             } else {
-                // Nếu đây là một bài hát (không phải bài đầu) bị lỗi (ví dụ: khi đang tự động Next)
-                // -> Tự động chuyển bài tiếp theo
                 Log.w(TAG, "Skipping song: No audio URL.");
                 Toast.makeText(this, "Không có URL nhạc! Đang chuyển bài...", Toast.LENGTH_SHORT).show();
-                handleSongCompletion(); // Chuyển bài tiếp theo
+                handleSongCompletion();
             }
-            return; // Dừng hàm setupMediaPlayer tại đây
+            return;
         }
-        // Kết thúc sửa lỗi
 
         try {
             if (mediaPlayer != null) {
@@ -251,13 +248,30 @@ public class PlayerActivity extends AppCompatActivity
             mediaPlayer.setDataSource(audioUrl);
 
             mediaPlayer.setOnPreparedListener(mp -> {
-                isFirstLoad = false; // ⭐ SỬA LỖI NHẢY BÀI: Đánh dấu là đã tải thành công
+                isFirstLoad = false;
                 isPreparing = false;
                 Log.d(TAG, "✅ Ready to play!");
                 int duration = mp.getDuration();
 
                 uiHelper.updateTimers(-1, duration);
                 uiHelper.updateSeekBar(-1, duration);
+
+                // ⭐ BÀN GIAO THỜI GIAN (Hand-off)
+                // Nếu có mốc thời gian được gửi đến, tua (seek) đến vị trí đó
+                if (startPositionMs > 0) {
+                    try {
+                        mp.seekTo(startPositionMs);
+                        Log.d(TAG, "Seeking to received position: " + startPositionMs + "ms");
+                        // Cập nhật UI ngay lập tức
+                        uiHelper.updateTimers(startPositionMs, duration);
+                        uiHelper.updateSeekBar(startPositionMs, duration);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error seeking to start position: " + e.getMessage());
+                    }
+                    // Reset lại cờ sau khi seek, để nó không seek lại khi xoay màn hình
+                    startPositionMs = 0;
+                }
+                // ⭐ KẾT THÚC BÀN GIAO
 
                 mp.start();
                 isPlaying = true;
@@ -560,13 +574,23 @@ public class PlayerActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
-        // KHI TẠM DỪNG ACTIVITY → DỪNG NHẠC TRONG PLAYER
-        if (mediaPlayer != null && isPlaying) {
-            mediaPlayer.pause();
+        // KHI TẠM DỪNG ACTIVITY
+        if (mediaPlayer != null) {
+            // ⭐ SỬA LỖI: Lưu lại vị trí trước khi pause
+            if (isPlaying) {
+                try {
+                    lastPlaybackPosition = mediaPlayer.getCurrentPosition(); // Lưu vị trí
+                } catch (Exception e) {
+                    lastPlaybackPosition = 0;
+                }
+                mediaPlayer.pause();
+            }
+            // ⭐ KẾT THÚC SỬA
+
             isPlaying = false;
             uiHelper.stopDiscAnimation();
             uiHelper.updatePlayPauseButton(false);
-            Log.d(TAG, "⏸️ PlayerActivity paused, music stopped");
+            Log.d(TAG, "⏸️ PlayerActivity paused at " + lastPlaybackPosition);
         }
     }
 
@@ -623,8 +647,10 @@ public class PlayerActivity extends AppCompatActivity
         if (serviceBound && musicService != null && playlist != null && !playlist.isEmpty()) {
             Song currentSong = playlist.get(currentSongIndex);
 
-            musicService.play(currentSong);
-            Log.d(TAG, "🔊 MiniPlayer resumed with: " + currentSong.title);
+            // ⭐ SỬA LỖI: Gọi hàm play mới với mốc thời gian
+            Log.d(TAG, "🔊 Resuming MiniPlayer at " + lastPlaybackPosition + "ms");
+            musicService.play(currentSong, lastPlaybackPosition);
+            // ⭐ KẾT THÚC SỬA
         }
     }
 }

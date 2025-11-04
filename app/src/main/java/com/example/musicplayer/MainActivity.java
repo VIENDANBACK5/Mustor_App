@@ -453,18 +453,46 @@ public class MainActivity extends AppCompatActivity
     /**
      * PHƯƠNG THỨC MỚI: Mở PlayerActivity dựa trên trạng thái của Service.
      */
+    /**
+     * PHƯƠNG THỨC MỚI: Mở PlayerActivity dựa trên trạng thái của Service.
+     * (Đã sửa lỗi IndexOutOfBoundsException VÀ thêm logic bàn giao thời gian)
+     */
     private void openPlayerActivityFromMiniPlayer() {
         if (serviceBound && musicService != null && musicService.getCurrentSong() != null) {
-            // Lấy playlist VÀ index hiện tại từ Service
+
+            Song currentSong = musicService.getCurrentSong();
             ArrayList<Song> currentPlaylist = musicService.getPlaylist();
             int currentIndex = musicService.getCurrentIndex();
 
-            if (currentPlaylist == null || currentPlaylist.isEmpty()) {
+            if (currentPlaylist == null) {
+                currentPlaylist = new ArrayList<>();
+            }
+
+            // ⭐ Xử lý lỗi IndexOutOfBoundsException (-1)
+            if (currentIndex == -1) {
+                boolean foundInPlaylist = false;
+                for (int i = 0; i < currentPlaylist.size(); i++) {
+                    if (currentPlaylist.get(i).id.equals(currentSong.id)) {
+                        currentIndex = i;
+                        foundInPlaylist = true;
+                        break;
+                    }
+                }
+
+                if (!foundInPlaylist) {
+                    currentPlaylist.add(currentSong);
+                    currentIndex = currentPlaylist.size() - 1;
+                    Log.d(TAG, "Added queue song to playlist. New index: " + currentIndex);
+                }
+            }
+            // ⭐ Kết thúc xử lý lỗi
+
+            if (currentPlaylist.isEmpty()) {
                 Toast.makeText(this, "Lỗi: Không tìm thấy playlist", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // Xây dựng lại Intent Extras như cũ
+            // Xây dựng Intent Extras
             ArrayList<String> playlistTitles = new ArrayList<>();
             ArrayList<String> playlistArtists = new ArrayList<>();
             ArrayList<String> playlistCovers = new ArrayList<>();
@@ -490,9 +518,14 @@ public class MainActivity extends AppCompatActivity
             intent.putIntegerArrayListExtra("playlist_durations", playlistDurations);
             intent.putExtra("current_index", currentIndex);
 
-            // Cờ này để báo cho PlayerActivity biết là chỉ cần "nối lại"
-            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            // ⭐ BÀN GIAO THỜI GIAN (Hand-off)
+            // Lấy vị trí hiện tại của MiniPlayer và gửi nó qua Intent
+            int currentPosition = musicService.getCurrentPosition();
+            intent.putExtra("start_position_ms", currentPosition);
+            Log.d(TAG, "Opening PlayerActivity at " + currentPosition + "ms");
+            // ⭐ KẾT THÚC BÀN GIAO
 
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(intent);
 
         } else {
@@ -571,11 +604,35 @@ public class MainActivity extends AppCompatActivity
 //    }
 
     private void handleLogout() {
+        Log.d(TAG, "🚀 Đang xử lý Đăng xuất...");
+
+        // ⭐ BƯỚC 1: Dừng MusicService
+        if (serviceBound && musicService != null) {
+            // Yêu cầu service dừng phát nhạc (hàm pause() của bạn đã có reset())
+            musicService.pause();
+
+            // Hủy liên kết (unbind) khỏi service
+            try {
+                unbindService(serviceConnection);
+            } catch (Exception e) {
+                Log.e(TAG, "Lỗi khi unbind service: " + e.getMessage());
+            }
+            serviceBound = false;
+        }
+
+        // ⭐ BƯỚC 2: Ra lệnh cho Service tự tắt hoàn toàn
+        // (Service sẽ chạy onDestroy() và giải phóng MediaPlayer)
+        Intent stopIntent = new Intent(this, MusicService.class);
+        stopService(stopIntent);
+
+        // ⭐ BƯỚC 3: Xóa session và chuyển Activity
         sessionManager.clear();
         Intent intent = new Intent(this, LoginActivity.class);
         intent.addFlags(
                 Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
+
+        // Kết thúc MainActivity
         finish();
     }
 

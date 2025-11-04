@@ -91,15 +91,20 @@ public class MusicService extends Service {
      * THÊM MỚI: Phát một bài hát cụ thể (dùng cho MiniPlayer khi thoát PlayerActivity)
      * Đây là phương thức mà PlayerActivity cần gọi trong showMiniPlayer()
      */
-    public void play(Song song) {
+    // XÓA HÀM CŨ NÀY (hoặc sửa nó, nhưng thêm hàm mới dễ hơn)
+// public void play(Song song) { ... }
+
+    /**
+     * THÊM MỚI (hoặc Sửa):
+     * Phát một bài hát, BẮT ĐẦU TỪ MỘT VỊ TRÍ CỤ THỂ.
+     */
+    public void play(Song song, int startPositionMs) {
         if (song == null || song.audio == null || song.audio.isEmpty()) {
             Log.e(TAG, "⚠️ Invalid song to play, skipping.");
             return;
         }
 
-        this.currentSong = song; // Cập nhật bài hát hiện tại
-        // Đặt index = -1 để báo hiệu đây là một bài hát đơn lẻ (không thuộc playlist)
-        // giống như cách bạn xử lý queue.
+        this.currentSong = song;
         this.currentSongIndex = -1;
 
         try {
@@ -114,7 +119,7 @@ public class MusicService extends Service {
                 mediaPlayer.setOnCompletionListener(mp -> handleSongCompletion());
                 mediaPlayer.setOnErrorListener((mp, what, extra) -> {
                     Log.e(TAG, "MediaPlayer error: " + what);
-                    playNext(); // Thử phát bài tiếp theo nếu có lỗi
+                    playNext();
                     return true;
                 });
             }
@@ -124,19 +129,32 @@ public class MusicService extends Service {
             mediaPlayer.prepareAsync();
 
             mediaPlayer.setOnPreparedListener(mp -> {
+
+                // ⭐ ĐÂY LÀ PHẦN SỬA ĐỔI QUAN TRỌNG
+                if (startPositionMs > 0) {
+                    mp.seekTo(startPositionMs);
+                }
+                // ⭐ KẾT THÚC SỬA ĐỔI
+
                 mp.start();
                 isPlaying = true;
                 updateNotification();
                 if (callback != null) {
                     callback.onPlaybackStateChanged(true);
-                    callback.onSongChanged(this.currentSong, -1); // -1 = bài hát đơn
+                    callback.onSongChanged(this.currentSong, -1);
                 }
-                Log.d(TAG, "🎵 Playing single song: " + this.currentSong.title);
+                Log.d(TAG, "🎵 Playing single song from " + startPositionMs + "ms: " + this.currentSong.title);
             });
 
         } catch (Exception e) {
             Log.e(TAG, "❌ Error playing single song: " + e.getMessage());
         }
+    }
+
+    // CŨNG CẬP NHẬT HÀM play(Song song) cũ (nếu bạn vẫn dùng nó ở đâu đó)
+// để nó gọi hàm mới này với 0 giây.
+    public void play(Song song) {
+        play(song, 0); // Gọi hàm mới với 0 giây
     }
 
 
