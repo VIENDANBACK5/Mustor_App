@@ -135,7 +135,16 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void setupLogoutButton() {
-        btnLogout.setOnClickListener(v -> handleLogout());
+        btnLogout.setOnClickListener(v -> {
+            new androidx.appcompat.app.AlertDialog.Builder(ProfileActivity.this)
+                    .setTitle("Xác nhận đăng xuất")
+                    .setMessage("Bạn có chắc chắn muốn đăng xuất không?")
+                    .setPositiveButton("Đăng xuất", (dialog, which) -> {
+                        handleLogout();
+                    })
+                    .setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss())
+                    .show();
+        });
     }
 
     private void setupBackButton() {
