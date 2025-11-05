@@ -1,4 +1,4 @@
-package com.example.musicplayer.playlist.kienthuc;
+package com.example.musicplayer.knowledge;
 
 public class MusicKnowledge {
     private String id;

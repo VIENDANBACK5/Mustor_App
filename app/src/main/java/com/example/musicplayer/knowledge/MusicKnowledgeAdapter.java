@@ -1,4 +1,4 @@
-package com.example.musicplayer.playlist.kienthuc;
+package com.example.musicplayer.knowledge;
 
 import android.content.Context;
 import android.view.LayoutInflater;

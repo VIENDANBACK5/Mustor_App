@@ -4,13 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="200dp"
     android:orientation="vertical"
-    android:background="@color/black"
-    android:padding="20dp"
+    android:background="#1A1A1A"
     android:gravity="bottom">
 
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_margin="20dp"
         android:src="@drawable/logo"
         />
 

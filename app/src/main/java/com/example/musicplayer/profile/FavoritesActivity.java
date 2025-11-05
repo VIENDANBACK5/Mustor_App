@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.musicplayer.R;
-import com.example.musicplayer.playlist.activity.PlayerActivity;
+import com.example.musicplayer.player.PlayerActivity;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

@@ -1,8 +1,8 @@
-package com.example.musicplayer.playlist.kienthuc;
+package com.example.musicplayer.knowledge;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,8 +19,9 @@ public class MusicKnowledgeActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private MusicKnowledgeAdapter adapter;
     private ArrayList<MusicKnowledge> knowledgeList;
-    private TextView btnBack;
     private FloatingActionButton fabAddKnowledge;
+
+    private ImageButton btnBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

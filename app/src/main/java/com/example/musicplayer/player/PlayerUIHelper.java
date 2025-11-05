@@ -1,4 +1,4 @@
-package com.example.musicplayer.playlist.activity;
+package com.example.musicplayer.player;
 
 import android.animation.ValueAnimator;
 import android.graphics.Bitmap;

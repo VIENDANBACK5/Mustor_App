@@ -1,4 +1,4 @@
-package com.example.musicplayer.playlist.activity;
+package com.example.musicplayer.player;
 
 import android.util.Log;
 

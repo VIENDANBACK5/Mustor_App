@@ -53,14 +53,14 @@
         <activity android:name=".profile.ProfileActivity" />
         <activity android:name=".libary.LibraryActivity" />
         <activity android:name=".profile.FavoritesActivity" />
-        <activity android:name=".playlist.kienthuc.MusicKnowledgeActivity" />
+        <activity android:name=".knowledge.MusicKnowledgeActivity" />
         <activity android:name=".profile.HistoryActivity" />
         <activity android:name=".profile.SettingsActivity" />
         <activity android:name=".profile.AboutActivity" />
         <activity android:name=".profile.EditProfileActivity"/>
 
         <activity
-            android:name=".playlist.activity.PlayerActivity"
+            android:name=".player.PlayerActivity"
             android:screenOrientation="portrait" />
 
         <service

@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@drawable/gradient_header"
+        android:background="@color/theme"
         android:elevation="4dp">
 
         <LinearLayout
@@ -22,14 +22,14 @@
             android:gravity="center_vertical"
             android:padding="16dp">
 
-            <TextView
+            <ImageButton
                 android:id="@+id/btnBack"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:text="←"
-                android:textColor="#FFFFFF"
-                android:textSize="24sp"
-                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/arrow_back_24px"
+                android:layout_alignParentStart="true"
+                android:clickable="true"
+                android:focusable="true"
                 android:background="?attr/selectableItemBackgroundBorderless" />
 
             <TextView
@@ -47,7 +47,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@android:drawable/ic_input_add"
-                app:backgroundTint="#9B4DCA"
+                app:backgroundTint="@color/theme_200"
                 app:tint="#FFFFFF"
                 app:fabSize="mini"
                 app:elevation="6dp" />
@@ -77,7 +77,7 @@
                     android:paddingEnd="16dp"
                     android:paddingTop="8dp"
                     android:paddingBottom="8dp"
-                    android:background="@drawable/category_selected"
+                    android:background="@drawable/category_badge"
                     android:layout_marginEnd="8dp" />
 
                 <TextView

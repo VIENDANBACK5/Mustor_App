@@ -18,7 +18,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.musicplayer.R;
-import com.example.musicplayer.playlist.activity.PlayerActivity;
+import com.example.musicplayer.player.PlayerActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
