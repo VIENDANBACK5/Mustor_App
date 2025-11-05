@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.musicplayer.MainActivity;
 import com.example.musicplayer.R;
 import com.example.musicplayer.api.DeezerApi;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.gson.annotations.SerializedName;
 
 import retrofit2.Call;
@@ -213,7 +214,7 @@ public class LoginActivity extends AppCompatActivity {
     private DeezerApi authApi;
 
     private EditText etUsername;
-    private EditText etPassword;
+    private TextInputEditText etPassword;
     private Button btnLogin;
     private TextView tvGoToRegister;
 

@@ -22,7 +22,7 @@ import com.example.musicplayer.Song;
 import com.example.musicplayer.api.DeezerApi;
 import com.example.musicplayer.login.LoginActivity;
 import com.example.musicplayer.utils.HistoryManager;
-import com.example.musicplayer.profile.FavoritesManager;
+import com.example.musicplayer.favorites.FavoritesManager;
 
 import java.util.ArrayList;
 

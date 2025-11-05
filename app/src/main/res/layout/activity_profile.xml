@@ -115,7 +115,7 @@
                         android:id="@+id/tvSongsPlayedCount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="1,234"
+                        android:text="9.999"
                         android:textColor="#FFF"
                         android:textSize="24sp"
                         android:textStyle="bold" />
@@ -147,6 +147,7 @@
                     android:padding="16dp">
 
                     <TextView
+                        android:id="@+id/tvFavoritesCount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="89"

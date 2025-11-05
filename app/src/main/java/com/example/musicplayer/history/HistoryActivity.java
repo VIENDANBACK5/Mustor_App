@@ -1,4 +1,4 @@
-package com.example.musicplayer.profile;
+package com.example.musicplayer.history;
 
 import android.os.Bundle;
 import android.widget.Toast;

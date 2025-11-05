@@ -93,17 +93,27 @@
                 android:padding="12dp" />
 
             <!-- Password Input -->
-            <EditText
-                android:id="@+id/etRegisterPassword"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:background="@drawable/edit_text_background"
-                android:textColor="#FFFFFF"
-                android:textColorHint="#808080"
-                android:hint="Nhập mật khẩu..."
-                android:inputType="textPassword"
-                android:padding="12dp" />
+                app:passwordToggleEnabled="true"
+                app:passwordToggleTint="#FFFFFF"
+                app:boxBackgroundMode="none"
+                app:hintEnabled="false">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etRegisterPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Nhập mật khẩu..."
+                    android:background="@drawable/edit_text_background"
+                    android:inputType="textPassword"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#808080"
+                    android:padding="14dp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
 
         </LinearLayout>
 

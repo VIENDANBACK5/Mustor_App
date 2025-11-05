@@ -1,4 +1,4 @@
-package com.example.musicplayer.profile;
+package com.example.musicplayer.favorites;
 
 import android.content.Intent;
 import android.os.Bundle;

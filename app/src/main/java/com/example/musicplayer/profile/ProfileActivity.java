@@ -16,6 +16,7 @@ import com.example.musicplayer.MainActivity;
 import com.example.musicplayer.R;
 import com.example.musicplayer.api.DeezerApi;
 import com.example.musicplayer.api.HistoryStatsResponse;
+import com.example.musicplayer.favorites.FavoritesManager;
 import com.example.musicplayer.login.LoginActivity;
 import com.example.musicplayer.login.UpdateUserRequest;
 import java.text.NumberFormat;
@@ -33,14 +34,15 @@ public class ProfileActivity extends AppCompatActivity {
     private LoginActivity.SessionManager sessionManager;
     private LoginActivity.AuthTokenResponse.User currentUser;
 
+    private FavoritesManager favoritesManager;
+
     private DeezerApi deezerApi;
 
     private ImageButton btnBackProfile;
 
-    private TextView tvUserName, tvUserEmail;
-    private TextView tvSongsPlayedCount;
+    private TextView tvUserName, tvUserEmail, tvSongsPlayedCount, tvFavoritesCount;
 
-    private LinearLayout btnEditProfile, btnLogout;
+    private LinearLayout btnEditProfile, btnChangePassword, btnSetting,btnAbout,  btnLogout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +51,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         // Initialize session manager before any logout or auth actions
         sessionManager = new LoginActivity.SessionManager(this);
+        favoritesManager = FavoritesManager.getInstance(this);
 
         // Setup Retrofit / API client with auth interceptor
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
@@ -72,11 +75,16 @@ public class ProfileActivity extends AppCompatActivity {
 
         btnBackProfile = findViewById(R.id.btnBackProfile);
         btnEditProfile = findViewById(R.id.btnEditProfile);
+        btnSetting = findViewById(R.id.btnSetting);
+        btnChangePassword = findViewById(R.id.btnChangePassword);
+        btnAbout = findViewById(R.id.btnAbout);
         btnLogout = findViewById(R.id.btnLogout);
+
 
         tvUserName = findViewById(R.id.tvUserName);
         tvUserEmail = findViewById(R.id.tvUserEmail);
         tvSongsPlayedCount = findViewById(R.id.tvSongsPlayedCount);
+        tvFavoritesCount = findViewById(R.id.tvFavoritesCount);
 
         // TODO: Load user profile data
         TextView tvTitle = findViewById(R.id.tvTitle);
@@ -84,11 +92,16 @@ public class ProfileActivity extends AppCompatActivity {
             tvTitle.setText("Hồ sơ cá nhân");
         }
 
+        tvFavoritesCount.setText(String.valueOf(favoritesManager.getFavoritesCount()));
+
         loadUserProfile();
         loadHistoryStats();
 
         setupBackButton();
         setupEditButton();
+        setupChangeButton();
+        setupAboutButton();
+        setupSettingButton();
         setupLogoutButton();
     }
 
@@ -150,6 +163,30 @@ public class ProfileActivity extends AppCompatActivity {
     private void setupBackButton() {
         btnBackProfile.setOnClickListener(v -> finish());
     }
+
+    private void setupSettingButton(){
+        btnSetting.setOnClickListener(v -> {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            Toast.makeText(this, "Tính năng chưa phát triển", Toast.LENGTH_SHORT).show();
+            startActivity(intent);
+        });
+    }
+
+    private void setupChangeButton(){
+        btnChangePassword.setOnClickListener(v ->{
+            Intent intent = new Intent(this, ChangePasswordActivity.class);
+            //TODO: logic
+            startActivity(intent);
+        });
+    }
+
+    private void setupAboutButton(){
+        btnAbout.setOnClickListener(v -> {
+            Intent intent = new Intent(this, AboutActivity.class);
+            startActivity(intent);
+        });
+    }
+
     private void setupEditButton(){
         btnEditProfile.setOnClickListener(v -> {
             if (currentUser != null) {

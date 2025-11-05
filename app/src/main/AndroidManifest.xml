@@ -50,11 +50,14 @@
             android:windowSoftInputMode="adjustResize" />
 
         <!-- Other activities -->
-        <activity android:name=".profile.ProfileActivity" />
+
         <activity android:name=".libary.LibraryActivity" />
-        <activity android:name=".profile.FavoritesActivity" />
+        <activity android:name=".favorites.FavoritesActivity" />
         <activity android:name=".knowledge.MusicKnowledgeActivity" />
-        <activity android:name=".profile.HistoryActivity" />
+        <activity android:name=".history.HistoryActivity" />
+
+        <activity android:name=".profile.ProfileActivity" />
+        <activity android:name=".profile.ChangePasswordActivity"/>
         <activity android:name=".profile.SettingsActivity" />
         <activity android:name=".profile.AboutActivity" />
         <activity android:name=".profile.EditProfileActivity"/>

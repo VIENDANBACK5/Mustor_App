@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.musicplayer.MainActivity;
 import com.example.musicplayer.R;
 import com.example.musicplayer.api.DeezerApi;
+import com.google.android.material.textfield.TextInputEditText;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -27,7 +28,9 @@ public class RegisterActivity extends AppCompatActivity {
     private static final String API_BASE_URL = "http://192.168.30.28:5030/";
     private static final int TOKEN_EXPIRATION_SECONDS = 604800; // 7 days
 
-    private EditText etFullName, etUsername, etEmail, etPassword;
+    private EditText etFullName, etUsername, etEmail;
+
+    private TextInputEditText etPassword;
     private Button btnRegister;
     private TextView tvGoToLogin;
 
