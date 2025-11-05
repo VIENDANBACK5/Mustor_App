@@ -389,7 +389,7 @@ public class PlayerActivity extends AppCompatActivity
                     mediaPlayer.pause();
                     uiHelper.stopDiscAnimation();
 
-                    // ⭐ SỬA LỖI: Chủ động dừng vòng lặp cập nhật seekbar
+                    //  SỬA LỖI: Chủ động dừng vòng lặp cập nhật seekbar
                     stopSeekBarUpdater();
 
                 } else {
@@ -397,7 +397,7 @@ public class PlayerActivity extends AppCompatActivity
                     mediaPlayer.start();
                     uiHelper.startDiscAnimation();
 
-                    // ⭐ SỬA LỖI: Bắt đầu lại vòng lặp cập nhật seekbar
+                    // SỬA LỖI: Bắt đầu lại vòng lặp cập nhật seekbar
                     startSeekBarUpdater();
                 }
 

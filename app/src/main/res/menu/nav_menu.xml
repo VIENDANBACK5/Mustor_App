@@ -9,7 +9,7 @@
 
         <item
             android:id="@+id/nav_library"
-            android:icon="@android:drawable/ic_menu_gallery"
+            android:icon="@drawable/library_music_24px"
             android:title="Thư viện" />
 
         <item
@@ -19,12 +19,12 @@
 
         <item
             android:id="@+id/nav_playlists"
-            android:icon="@android:drawable/ic_menu_sort_by_size"
+            android:icon="@drawable/book_24px"
             android:title="Kiến thức" />
 
         <item
             android:id="@+id/nav_history"
-            android:icon="@android:drawable/ic_menu_recent_history"
+            android:icon="@drawable/history_2_24px"
             android:title="Lịch sử phát" />
     </group>
 </menu>

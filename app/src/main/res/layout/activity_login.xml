@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="#121212"
     android:fillViewport="true"
     tools:context=".login.LoginActivity">
@@ -108,7 +109,7 @@
             android:textSize="16sp"
             android:textStyle="bold"
             android:background="@drawable/rounded_edittext"
-            android:backgroundTint="@color/theme"
+            app:backgroundTint="@color/theme"
             android:elevation="4dp" />
 
         <!-- Register Link -->

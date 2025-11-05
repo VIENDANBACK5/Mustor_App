@@ -38,9 +38,9 @@ public class FavoritesManager {
         listeners.add(listener);
     }
 
-    public void removeListener(FavoritesChangeListener listener) {
-        listeners.remove(listener);
-    }
+        public void removeListener(FavoritesChangeListener listener) {
+            listeners.remove(listener);
+        }
 
     private void notifyListeners() {
         for (FavoritesChangeListener listener : listeners) {

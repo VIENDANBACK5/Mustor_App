@@ -15,8 +15,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.musicplayer.MainActivity;
 import com.example.musicplayer.R;
 import com.example.musicplayer.api.DeezerApi;
+import com.example.musicplayer.api.HistoryStatsResponse;
 import com.example.musicplayer.login.LoginActivity;
 import com.example.musicplayer.login.UpdateUserRequest;
+import java.text.NumberFormat;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -36,6 +38,7 @@ public class ProfileActivity extends AppCompatActivity {
     private ImageButton btnBackProfile;
 
     private TextView tvUserName, tvUserEmail;
+    private TextView tvSongsPlayedCount;
 
     private LinearLayout btnEditProfile, btnLogout;
 
@@ -73,6 +76,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         tvUserName = findViewById(R.id.tvUserName);
         tvUserEmail = findViewById(R.id.tvUserEmail);
+        tvSongsPlayedCount = findViewById(R.id.tvSongsPlayedCount);
 
         // TODO: Load user profile data
         TextView tvTitle = findViewById(R.id.tvTitle);
@@ -81,6 +85,7 @@ public class ProfileActivity extends AppCompatActivity {
         }
 
         loadUserProfile();
+        loadHistoryStats();
 
         setupBackButton();
         setupEditButton();
@@ -103,6 +108,28 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call<LoginActivity.AuthTokenResponse.User> call, @NonNull Throwable t) {
                 Toast.makeText(ProfileActivity.this, "Could not load user profile", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void loadHistoryStats() {
+        // Fetch history statistics (total plays, unique tracks, etc.)
+        deezerApi.getHistoryStats().enqueue(new Callback<HistoryStatsResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<HistoryStatsResponse> call, @NonNull Response<HistoryStatsResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().data != null) {
+                    int totalPlays = response.body().data.totalPlays;
+                    // Format with locale-aware grouping
+                    String formatted = NumberFormat.getIntegerInstance().format(totalPlays);
+                    if (tvSongsPlayedCount != null) {
+                        tvSongsPlayedCount.setText(formatted);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<HistoryStatsResponse> call, @NonNull Throwable t) {
+                Toast.makeText(ProfileActivity.this, "Could not load history total", Toast.LENGTH_SHORT).show();
             }
         });
     }

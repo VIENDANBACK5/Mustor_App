@@ -145,14 +145,14 @@ public class MainActivity extends AppCompatActivity
 
                 @Override
                 public void onQueueUpdated() {
-                    runOnUiThread(() -> updateQueueBadge());
+//                    runOnUiThread(() -> updateQueueBadge());
                 }
             });
             serviceBound = true;
 
             // Cập nhật UI ngay khi kết nối
             updateUIFromService();
-            updateQueueBadge();
+//            updateQueueBadge();
         }
 
         @Override
@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity
         setupSearchBar();
         setupTabs();
         setupChatbot();
-        setupQueueButton();
+//        setupQueueButton();
         setupMiniPlayer(); // Thêm phương thức setup mini-player
 
         loadInitialData();
@@ -192,27 +192,27 @@ public class MainActivity extends AppCompatActivity
         bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
-    private void setupQueueButton() {
-        View btnQueue = findViewById(R.id.btnQueue);
-        tvQueueBadge = findViewById(R.id.tvQueueBadge);
+//    private void setupQueueButton() {
+//        View btnQueue = findViewById(R.id.btnQueue);
+//        tvQueueBadge = findViewById(R.id.tvQueueBadge);
+//
+//        btnQueue.setOnClickListener(v -> {
+//            Intent intent = new Intent(this, QueueActivity.class);
+//            startActivity(intent);
+//        });
+//    }
 
-        btnQueue.setOnClickListener(v -> {
-            Intent intent = new Intent(this, QueueActivity.class);
-            startActivity(intent);
-        });
-    }
-
-    private void updateQueueBadge() {
-        if (musicService != null) {
-            int queueSize = musicService.getQueue().size();
-            if (queueSize > 0) {
-                tvQueueBadge.setVisibility(View.VISIBLE);
-                tvQueueBadge.setText(String.valueOf(queueSize));
-            } else {
-                tvQueueBadge.setVisibility(View.GONE);
-            }
-        }
-    }
+//    private void updateQueueBadge() {
+//        if (musicService != null) {
+//            int queueSize = musicService.getQueue().size();
+//            if (queueSize > 0) {
+//                tvQueueBadge.setVisibility(View.VISIBLE);
+//                tvQueueBadge.setText(String.valueOf(queueSize));
+//            } else {
+//                tvQueueBadge.setVisibility(View.GONE);
+//            }
+//        }
+//    }
 
     @Override
     public void onAddToQueue(Song song) {
@@ -616,22 +616,11 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent);
         });
     }
-//
-//    private void openProfile() {
-//        if (currentUser != null) {
-//            Intent intent = new Intent(this, ProfileActivity.class);
-//            intent.putExtra("USER_NAME", currentUser.fullName);
-//            intent.putExtra("USER_EMAIL", currentUser.email);
-//            startActivity(intent);
-//        } else {
-//            Toast.makeText(this, "User data not loaded yet", Toast.LENGTH_SHORT).show();
-//        }
-//    }
 
     private void handleLogout() {
         Log.d(TAG, "🚀 Đang xử lý Đăng xuất...");
 
-        // ⭐ BƯỚC 1: Dừng MusicService
+        // Dừng MusicService
         if (serviceBound && musicService != null) {
             // Yêu cầu service dừng phát nhạc (hàm pause() của bạn đã có reset())
             musicService.pause();
@@ -645,12 +634,12 @@ public class MainActivity extends AppCompatActivity
             serviceBound = false;
         }
 
-        // ⭐ BƯỚC 2: Ra lệnh cho Service tự tắt hoàn toàn
+        // Ra lệnh cho Service tự tắt hoàn toàn
         // (Service sẽ chạy onDestroy() và giải phóng MediaPlayer)
         Intent stopIntent = new Intent(this, MusicService.class);
         stopService(stopIntent);
 
-        // ⭐ BƯỚC 3: Xóa session và chuyển Activity
+        // Xóa session và chuyển Activity
         sessionManager.clear();
         Intent intent = new Intent(this, LoginActivity.class);
         intent.addFlags(
@@ -765,7 +754,7 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         // Cập nhật queue và mini-player khi quay lại
-        updateQueueBadge();
+//        updateQueueBadge();
         updateUIFromService();
     }
 

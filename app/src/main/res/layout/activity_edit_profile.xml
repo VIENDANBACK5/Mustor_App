@@ -101,7 +101,7 @@
             android:layout_marginTop="32dp"
             android:text="Lưu thay đổi"
             android:background="@drawable/rounded_edittext"
-            android:backgroundTint="@color/theme"
+            app:backgroundTint="@color/theme"
             android:textColor="#FFFFFF" />
 
         <Button
@@ -111,7 +111,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="Đổi mật khẩu"
-            android:textColor="@color/theme" />
+            android:textColor="#FFF" />
     </LinearLayout>
 
 
