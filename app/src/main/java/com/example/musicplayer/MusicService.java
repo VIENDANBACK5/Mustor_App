@@ -226,14 +226,18 @@ public class MusicService extends Service {
         // Không có queue, phát bài tiếp theo trong playlist
         if (playlist.isEmpty()) return;
 
+        // ⭐ SỬA LỖI: Lấy index thực sự, thay vì dùng currentSongIndex
+        int actualIndex = getActualCurrentIndex();
+
         if (isShuffle) {
             int randomIndex;
             do {
                 randomIndex = (int) (Math.random() * playlist.size());
-            } while (randomIndex == currentSongIndex && playlist.size() > 1);
+            } while (randomIndex == actualIndex && playlist.size() > 1); // Dùng actualIndex
             playSong(randomIndex);
         } else {
-            playSong((currentSongIndex + 1) % playlist.size());
+            // ⭐ SỬA LỖI: Dùng actualIndex
+            playSong((actualIndex + 1) % playlist.size());
         }
     }
 
@@ -242,14 +246,9 @@ public class MusicService extends Service {
      */
     public void playPrevious() {
         if (playlist.isEmpty()) return;
+        int actualIndex = getActualCurrentIndex();
 
-        // Nếu đang phát từ queue, quay lại bài playlist trước đó
-        if (currentSongIndex == -1 && !playlist.isEmpty()) {
-            playSong(0); // Quay về bài đầu playlist
-            return;
-        }
-
-        playSong((currentSongIndex - 1 + playlist.size()) % playlist.size());
+        playSong((actualIndex - 1 + playlist.size()) % playlist.size());
     }
 
     // ========== QUEUE MANAGEMENT (Giữ nguyên) ==========
@@ -564,5 +563,31 @@ public class MusicService extends Service {
             mediaPlayer = null;
         }
         Log.d(TAG, "🛑 MusicService destroyed");
+    }
+    /**
+     * THÊM MỚI: Helper để tìm index *thực sự* của bài hát hiện tại,
+     * ngay cả khi currentSongIndex = -1 (do handoff từ PlayerActivity).
+     */
+    private int getActualCurrentIndex() {
+        // Nếu index đã đúng (không phải -1), trả về luôn
+        if (currentSongIndex != -1) {
+            return currentSongIndex;
+        }
+
+        // Nếu index là -1, ta phải tìm thủ công trong playlist
+        if (currentSong != null && playlist != null && !playlist.isEmpty()) {
+            for (int i = 0; i < playlist.size(); i++) {
+                // So sánh ID bài hát
+                if (currentSong.id.equals(playlist.get(i).id)) {
+                    Log.d(TAG, "getActualCurrentIndex: Tìm thấy index " + i + " cho bài hát " + currentSong.title);
+                    return i; // Tìm thấy!
+                }
+            }
+        }
+
+        // Không tìm thấy, hoặc currentSong là null,
+        // trả về 0 để tránh lỗi và phát bài đầu tiên
+        Log.w(TAG, "getActualCurrentIndex: Không tìm thấy index, trả về 0");
+        return 0;
     }
 }
