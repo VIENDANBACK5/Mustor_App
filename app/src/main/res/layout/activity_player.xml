@@ -286,13 +286,13 @@
                     android:layout_height="72dp"
                     app:cardCornerRadius="36dp"
                     app:cardElevation="12dp"
-                    app:cardBackgroundColor="#1DB954">
+                    app:cardBackgroundColor="@color/theme">
 
                     <ImageButton
                         android:id="@+id/btnPlayPause"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:background="@color/theme"
                         android:src="@android:drawable/ic_media_play"
                         android:contentDescription="Play/Pause"
                         app:tint="#FFFFFF"
@@ -349,13 +349,6 @@
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
                         android:layout_marginBottom="16dp">
-
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@android:drawable/ic_menu_edit"
-                            app:tint="#1DB954"
-                            android:contentDescription="Lyrics icon" />
 
                         <TextView
                             android:layout_width="wrap_content"

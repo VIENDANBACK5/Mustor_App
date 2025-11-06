@@ -13,10 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Quản lý danh sách yêu thích (bài hát, album, nghệ sĩ).
- * Lưu trữ dữ liệu bằng SharedPreferences ở dạng JSON.
- */
 public class FavoritesManager {
     private static final String PREFS_NAME = "FavoritesPrefs";
     private static final String KEY_FAVORITES = "favorites";
@@ -48,7 +44,7 @@ public class FavoritesManager {
         // Kiểm tra trùng ID
         for (LibraryItem fav : favorites) {
             if (fav.getId().equals(item.getId())) {
-                return; // Đã tồn tại, không thêm lại
+                return;
             }
         }
 

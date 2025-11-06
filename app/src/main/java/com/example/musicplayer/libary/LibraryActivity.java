@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,7 +18,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.musicplayer.R;
-import com.example.musicplayer.playlist.activity.PlayerActivity;
+import com.example.musicplayer.player.PlayerActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,7 +30,9 @@ import java.util.List;
 public class LibraryActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
-    private TextView tabSongs, tabAlbums, tabArtists, tabFavorites, btnBack;
+    private TextView tabSongs, tabAlbums, tabArtists, tabFavorites;
+
+    private ImageButton btnBack;
     private EditText searchBox;
     private LibraryAdapter adapter;
     private RequestQueue requestQueue;
@@ -65,7 +68,7 @@ public class LibraryActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerView);
         tabSongs = findViewById(R.id.tabSongs);
         tabAlbums = findViewById(R.id.tabAlbums);
-        tabArtists = findViewById(R.id.tabArtists); // sẽ là null nếu layout không có
+        tabArtists = findViewById(R.id.tabArtists);
         tabFavorites = findViewById(R.id.tabFavorites);
         btnBack = findViewById(R.id.btnBack);
         searchBox = findViewById(R.id.searchBox);
@@ -231,7 +234,6 @@ public class LibraryActivity extends AppCompatActivity {
     }
 
     private void updateTabUI() {
-        // Reset tất cả tabs
         tabSongs.setBackgroundResource(R.drawable.tab_unselected);
         tabSongs.setTextColor(0xFFAAAAAA);
         tabAlbums.setBackgroundResource(R.drawable.tab_unselected);
@@ -241,7 +243,6 @@ public class LibraryActivity extends AppCompatActivity {
         tabFavorites.setBackgroundResource(R.drawable.tab_unselected);
         tabFavorites.setTextColor(0xFFAAAAAA);
 
-        // Highlight tab được chọn
         switch (currentTab) {
             case SONGS:
                 tabSongs.setBackgroundResource(R.drawable.tab_selected);

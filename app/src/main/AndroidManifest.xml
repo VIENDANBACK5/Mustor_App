@@ -14,12 +14,12 @@
         android:icon="@mipmap/ic_launcher"
         android:label="Music App"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+        android:theme="@style/Theme.MusicPlayer"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
 
 
-        <!-- Login is the launcher -->
+        <!-- Login  -->
         <activity
             android:name=".login.LoginActivity"
             android:exported="true"
@@ -30,13 +30,13 @@
             </intent-filter>
         </activity>
 
-        <!-- ADDED: RegisterActivity declaration -->
+        <!-- Register -->
         <activity
             android:name=".login.RegisterActivity"
             android:screenOrientation="fullSensor"
             tools:ignore="DiscouragedApi" />
 
-        <activity android:name=".QueueActivity" />
+        <activity android:name=".music.QueueActivity" />
 
 
         <!-- Main screen -->
@@ -46,24 +46,28 @@
             tools:ignore="DiscouragedApi" />
 
         <activity
-            android:name=".SearchActivity"
+            android:name=".utils.SearchActivity"
             android:windowSoftInputMode="adjustResize" />
 
         <!-- Other activities -->
-        <activity android:name=".profile.ProfileActivity" />
+
         <activity android:name=".libary.LibraryActivity" />
-        <activity android:name=".profile.FavoritesActivity" />
-        <activity android:name=".playlist.kienthuc.MusicKnowledgeActivity" />
-        <activity android:name=".profile.HistoryActivity" />
+        <activity android:name=".favorites.FavoritesActivity" />
+        <activity android:name=".knowledge.MusicKnowledgeActivity" />
+        <activity android:name=".history.HistoryActivity" />
+
+        <activity android:name=".profile.ProfileActivity" />
+        <activity android:name=".profile.ChangePasswordActivity"/>
         <activity android:name=".profile.SettingsActivity" />
         <activity android:name=".profile.AboutActivity" />
+        <activity android:name=".profile.EditProfileActivity"/>
 
         <activity
-            android:name=".playlist.activity.PlayerActivity"
+            android:name=".player.PlayerActivity"
             android:screenOrientation="portrait" />
 
         <service
-            android:name=".MusicService"
+            android:name=".music.MusicService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />

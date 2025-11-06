@@ -57,7 +57,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Song Title"
-                android:textColor="#FFFFFF"
+                android:textColor="#fff4f4ff"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 android:maxLines="1"

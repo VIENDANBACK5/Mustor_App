@@ -26,7 +26,7 @@
             android:id="@+id/topBar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="24dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingHorizontal="16dp"
@@ -49,34 +49,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_weight="1"
-                android:text="Mustor"
+                android:text="@string/app_name"
                 android:textColor="#FFFFFF"
                 android:textSize="20sp"
-                android:textStyle="bold" />
-            <FrameLayout
-                android:id="@+id/btnQueue"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginEnd="8dp">
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_queue"
-                    android:layout_gravity="center"
-                    app:tint="#FFFFFF" />
+                android:textStyle="bold"
+                />
 
-                <TextView
-                    android:id="@+id/tvQueueBadge"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:background="@drawable/badge_background"
-                    android:text="0"
-                    android:textColor="#FFFFFF"
-                    android:textSize="10sp"
-                    android:gravity="center"
-                    android:layout_gravity="top|end"
-                    android:visibility="gone"/>
-            </FrameLayout>
             <ImageView
                 android:id="@+id/btnProfile"
                 android:layout_width="32dp"
@@ -262,10 +240,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/robot_2_24px"
             android:padding="20dp"
-            app:backgroundTint="#3949AB"
-
             app:layout_constraintBottom_toTopOf="@id/miniPlayerFragmentContainer"
-
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_margin="24dp" />
 
@@ -284,6 +259,8 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+
+
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigationView"
         android:layout_width="280dp"
@@ -293,7 +270,8 @@
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header"
         app:menu="@menu/nav_menu"
-        app:itemIconTint="#9B4DCA"
-        app:itemTextColor="#FFFFFF" />
+        app:itemIconTint="@color/nav_item_text"
+        app:itemTextColor="@color/nav_item_text"
+        app:itemBackground="@drawable/nav_item_background"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>
