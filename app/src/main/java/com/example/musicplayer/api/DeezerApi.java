@@ -27,7 +27,12 @@ public interface DeezerApi {
     // ==================== PROFILE ENDPOINTS ====================
     
     @PUT("/api/auth/me")
-    Call<Void> updateProfile(@Body LoginActivity.UpdateProfileRequest request);    // ==================== DEEZER MUSIC ENDPOINTS ====================
+    Call<Void> updateProfile(@Body LoginActivity.UpdateProfileRequest request);
+    
+    @POST("/api/auth/change-password")
+    Call<Void> changePassword(@Body ChangePasswordRequest request);
+
+    // ==================== DEEZER MUSIC ENDPOINTS ====================
 
     // Play track và tự động save vào history (auto-save)
     @POST("/api/deezer/tracks/{track_id}/play")

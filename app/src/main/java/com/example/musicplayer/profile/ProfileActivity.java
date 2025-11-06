@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.musicplayer.MainActivity;
 import com.example.musicplayer.R;
 import com.example.musicplayer.api.DeezerApi;
+import com.example.musicplayer.api.HistoryResponse;
 import com.example.musicplayer.api.HistoryStatsResponse;
 import com.example.musicplayer.favorites.FavoritesManager;
 import com.example.musicplayer.login.LoginActivity;
@@ -126,23 +127,27 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void loadHistoryStats() {
-        // Fetch history statistics (total plays, unique tracks, etc.)
-        deezerApi.getHistoryStats().enqueue(new Callback<HistoryStatsResponse>() {
+        // Lấy tổng số bài đã nghe từ /api/history (field "total")
+        deezerApi.getHistory(1, 0, null).enqueue(new Callback<HistoryResponse>() {
             @Override
-            public void onResponse(@NonNull Call<HistoryStatsResponse> call, @NonNull Response<HistoryStatsResponse> response) {
-                if (response.isSuccessful() && response.body() != null && response.body().data != null) {
-                    int totalPlays = response.body().data.totalPlays;
-                    // Format with locale-aware grouping
-                    String formatted = NumberFormat.getIntegerInstance().format(totalPlays);
+            public void onResponse(@NonNull Call<HistoryResponse> call, @NonNull Response<HistoryResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    int total = response.body().total; // Tổng số bản ghi history
+                    // Format với dấu phẩy: 1,234
+                    String formatted = NumberFormat.getIntegerInstance().format(total);
                     if (tvSongsPlayedCount != null) {
                         tvSongsPlayedCount.setText(formatted);
                     }
+                    android.util.Log.d("ProfileActivity", "📊 History total loaded: " + total);
+                } else {
+                    android.util.Log.e("ProfileActivity", "❌ History API failed: " + response.code());
                 }
             }
 
             @Override
-            public void onFailure(@NonNull Call<HistoryStatsResponse> call, @NonNull Throwable t) {
-                Toast.makeText(ProfileActivity.this, "Could not load history total", Toast.LENGTH_SHORT).show();
+            public void onFailure(@NonNull Call<HistoryResponse> call, @NonNull Throwable t) {
+                android.util.Log.e("ProfileActivity", "❌ History API error: " + t.getMessage());
+                Toast.makeText(ProfileActivity.this, "Không thể tải lịch sử nghe nhạc", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -175,7 +180,6 @@ public class ProfileActivity extends AppCompatActivity {
     private void setupChangeButton(){
         btnChangePassword.setOnClickListener(v ->{
             Intent intent = new Intent(this, ChangePasswordActivity.class);
-            //TODO: logic
             startActivity(intent);
         });
     }
