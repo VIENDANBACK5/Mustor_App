@@ -1,4 +1,4 @@
-package com.example.musicplayer;
+package com.example.musicplayer.music;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -14,6 +14,9 @@ import android.os.IBinder;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
+
+import com.example.musicplayer.MainActivity;
+import com.example.musicplayer.R;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

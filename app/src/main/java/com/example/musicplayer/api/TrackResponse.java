@@ -1,4 +1,4 @@
-package com.example.musicplayer;
+package com.example.musicplayer.api;
 
 import java.util.List;
 

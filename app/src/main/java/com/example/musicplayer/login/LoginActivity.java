@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.musicplayer.MainActivity;
 import com.example.musicplayer.R;
 import com.example.musicplayer.api.DeezerApi;
+import com.example.musicplayer.profile.ChangePasswordActivity;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.gson.annotations.SerializedName;
 
@@ -216,7 +217,7 @@ public class LoginActivity extends AppCompatActivity {
     private EditText etUsername;
     private TextInputEditText etPassword;
     private Button btnLogin;
-    private TextView tvGoToRegister;
+    private TextView tvGoToRegister, tvForgotPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -249,13 +250,17 @@ public class LoginActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
         tvGoToRegister = findViewById(R.id.tvGoToRegister);
+        tvForgotPassword = findViewById(R.id.tvForgotPassword);
     }
 
     private void setupListeners() {
         btnLogin.setOnClickListener(v -> handleLogin());
         tvGoToRegister.setOnClickListener(v -> {
-            // Navigate to RegisterActivity
-            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+            Intent intent = new Intent(this, RegisterActivity.class);
+            startActivity(intent);
+        });
+        tvForgotPassword.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ChangePasswordActivity.class);
             startActivity(intent);
         });
     }

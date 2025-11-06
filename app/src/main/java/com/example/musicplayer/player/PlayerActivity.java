@@ -15,13 +15,13 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.musicplayer.MusicService;
+import com.example.musicplayer.music.MusicService;
 import com.example.musicplayer.R;
-// Đảm bảo import đúng lớp Song (com.example.musicplayer.Song)
-import com.example.musicplayer.Song;
+// Đảm bảo import đúng lớp Song (com.example.musicplayer.music.Song)
+import com.example.musicplayer.music.Song;
 import com.example.musicplayer.api.DeezerApi;
 import com.example.musicplayer.login.LoginActivity;
-import com.example.musicplayer.utils.HistoryManager;
+import com.example.musicplayer.history.HistoryManager;
 import com.example.musicplayer.favorites.FavoritesManager;
 
 import java.util.ArrayList;

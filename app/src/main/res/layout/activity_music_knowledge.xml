@@ -47,7 +47,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@android:drawable/ic_input_add"
-                app:backgroundTint="@color/theme_200"
+                app:backgroundTint="@color/theme_dark"
                 app:tint="#FFFFFF"
                 app:fabSize="mini"
                 app:elevation="6dp" />

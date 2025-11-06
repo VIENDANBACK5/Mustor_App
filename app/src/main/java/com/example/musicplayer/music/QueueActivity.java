@@ -1,4 +1,4 @@
-package com.example.musicplayer;
+package com.example.musicplayer.music;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -16,9 +16,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.musicplayer.MusicService;
 import com.example.musicplayer.R;
-import com.example.musicplayer.Song;
 
 import java.util.ArrayList;
 

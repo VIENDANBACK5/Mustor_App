@@ -1,4 +1,4 @@
-package com.example.musicplayer;
+package com.example.musicplayer.music;
 
 public class Song {
     public String id; // Deezer Track ID
@@ -35,14 +35,9 @@ public class Song {
         this.cover = cover;
         this.audio = audio; // 'preview' từ PlayerActivity sẽ được gán vào 'audio'
         this.durationMs = durationMs;
-
-        // Gán giá trị mặc định
         this.lyrics = "";
         this.albumName = "";
         this.popularity = 0;
         this.deezerUrl = "";
     }
-
-    // THÊM MỚI: Constructor rỗng (rất quan trọng cho nhiều thư viện)
-    public Song() { }
 }

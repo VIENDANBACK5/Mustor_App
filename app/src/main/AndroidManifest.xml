@@ -36,7 +36,7 @@
             android:screenOrientation="fullSensor"
             tools:ignore="DiscouragedApi" />
 
-        <activity android:name=".QueueActivity" />
+        <activity android:name=".music.QueueActivity" />
 
 
         <!-- Main screen -->
@@ -46,7 +46,7 @@
             tools:ignore="DiscouragedApi" />
 
         <activity
-            android:name=".SearchActivity"
+            android:name=".utils.SearchActivity"
             android:windowSoftInputMode="adjustResize" />
 
         <!-- Other activities -->
@@ -67,7 +67,7 @@
             android:screenOrientation="portrait" />
 
         <service
-            android:name=".MusicService"
+            android:name=".music.MusicService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />

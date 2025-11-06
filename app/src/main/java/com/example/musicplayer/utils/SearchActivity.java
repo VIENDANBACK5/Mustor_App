@@ -1,4 +1,4 @@
-package com.example.musicplayer;
+package com.example.musicplayer.utils;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,6 +17,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.musicplayer.music.MusicAdapter;
+import com.example.musicplayer.R;
+import com.example.musicplayer.music.Song;
 import com.example.musicplayer.api.DeezerApi;
 import com.example.musicplayer.api.DeezerSearchResponse;
 import com.example.musicplayer.api.DeezerTrack;
