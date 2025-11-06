@@ -17,7 +17,7 @@ public class DeezerTrack {
     public String album;
 
     @SerializedName("duration")
-    public int duration; // seconds in Deezer API
+    public int duration;
 
     @SerializedName("rank")
     public int popularity;

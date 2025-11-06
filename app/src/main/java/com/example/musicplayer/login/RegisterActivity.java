@@ -92,11 +92,11 @@ public class RegisterActivity extends AppCompatActivity {
             public void onResponse(@NonNull Call<LoginActivity.AuthTokenResponse> call,
                     @NonNull Response<LoginActivity.AuthTokenResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    // Registration successful, auto-login the user
+                    // Đăng ký thành công, tự động đăng nhập người dùng
                     LoginActivity.AuthTokenResponse tokenResponse = response.body();
                     sessionManager.saveToken(tokenResponse.accessToken, TOKEN_EXPIRATION_SECONDS);
 
-                    Log.d(TAG, "Registration successful. Token saved.");
+                    Log.d(TAG, "Đăng ký thành công. Token đã được lưu.");
                     Toast.makeText(RegisterActivity.this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
 
                     // Navigate to MainActivity
@@ -114,7 +114,7 @@ public class RegisterActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull Call<LoginActivity.AuthTokenResponse> call, @NonNull Throwable t) {
-                Log.e(TAG, "Registration API call failed: ", t);
+                Log.e(TAG, "Gọi API đăng ký thất bại: ", t);
                 Toast.makeText(RegisterActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });

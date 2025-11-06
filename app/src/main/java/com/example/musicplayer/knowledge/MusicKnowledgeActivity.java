@@ -48,7 +48,6 @@ public class MusicKnowledgeActivity extends AppCompatActivity {
     }
 
     private void loadKnowledgeData() {
-        // Dữ liệu mẫu - Có thể thay thế bằng dữ liệu từ database
         knowledgeList.add(new MusicKnowledge(
                 "1",
                 "Lịch sử Nhạc Jazz",

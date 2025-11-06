@@ -35,7 +35,7 @@ public class PlayerActivity extends AppCompatActivity
     // UI (Được quản lý bởi Helper)
     private PlayerUIHelper uiHelper;
 
-    // Playback
+    // Phần phát nhạc
     private MediaPlayer mediaPlayer; // Sẽ được khởi tạo trong onServiceConnected
     private boolean isPlaying = false;
     private boolean isPreparing = false; // Chống lỗi state -38
@@ -45,7 +45,7 @@ public class PlayerActivity extends AppCompatActivity
     private Runnable updateSeekBar;
     private int lastPlaybackPosition = 0;
 
-    // ⭐ SỬA LỖI NHẢY BÀI: Thêm cờ (flag) để theo dõi lần tải đầu tiên
+    // SỬA LỖI NHẢY BÀI: Thêm cờ (flag) để theo dõi lần tải đầu tiên
     private boolean isFirstLoad = true;
 
     // Data
@@ -72,9 +72,9 @@ public class PlayerActivity extends AppCompatActivity
             MusicService.MusicBinder binder = (MusicService.MusicBinder) service;
             musicService = binder.getService();
             serviceBound = true;
-            Log.d(TAG, "✅ Connected to MusicService");
+            Log.d(TAG, "Đã kết nối với MusicService");
 
-            // ⭐ SỬA LỖI ĐÈ NHẠC
+            // SỬA LỖI ĐÈ NHẠC
             // 1. Tắt MiniPlayer ngay khi kết nối
             hideMiniPlayer();
 
@@ -95,23 +95,23 @@ public class PlayerActivity extends AppCompatActivity
         public void onServiceDisconnected(ComponentName name) {
             serviceBound = false;
             musicService = null;
-            Log.d(TAG, "❌ Disconnected from MusicService");
+            Log.d(TAG, "Đã ngắt kết nối khỏi MusicService");
         }
     };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "🚀 PlayerActivity onCreate() started");
+    Log.d(TAG, "PlayerActivity onCreate() bắt đầu");
         setContentView(R.layout.activity_player);
 
-        // ⭐ BÀN GIAO THỜI GIAN (Hand-off)
+    // BÀN GIAO THỜI GIAN (Hand-off)
         // Lấy vị trí bắt đầu từ Intent mà MainActivity gửi sang
         startPositionMs = getIntent().getIntExtra("start_position_ms", 0);
         if (startPositionMs > 0) {
             Log.d(TAG, "Received start position: " + startPositionMs + "ms");
         }
-        // ⭐ KẾT THÚC BÀN GIAO
+    // KẾT THÚC BÀN GIAO
 
         // Khởi tạo Managers
         sessionManager = new LoginActivity.SessionManager(this);
@@ -120,7 +120,7 @@ public class PlayerActivity extends AppCompatActivity
         favoritesManager.addListener(this);
 
         if (!sessionManager.isTokenValid()) {
-            Log.e(TAG, "❌ Token is invalid or expired!");
+            Log.e(TAG, "Token không hợp lệ hoặc đã hết hạn!");
             redirectToLogin();
             return;
         }
@@ -135,7 +135,7 @@ public class PlayerActivity extends AppCompatActivity
         // (Lệnh hideMiniPlayer() đã có trong onServiceConnected)
         hideMiniPlayer();
 
-        Log.d(TAG, "✅ PlayerActivity onCreate() completed (waiting for service)");
+    Log.d(TAG, "PlayerActivity onCreate() hoàn tất (đang chờ service)");
     }
 
     private void bindMusicService() {
@@ -221,11 +221,11 @@ public class PlayerActivity extends AppCompatActivity
         if (audioUrl == null || audioUrl.isEmpty()) {
             if (isFirstLoad) {
                 Log.e(TAG, "Cannot play: No audio URL for the first song.");
-                Toast.makeText(this, "Không thể phát: Bài hát không có URL nhạc.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Không thể phát: bài hát không có URL audio.", Toast.LENGTH_LONG).show();
                 finish();
             } else {
                 Log.w(TAG, "Skipping song: No audio URL.");
-                Toast.makeText(this, "Không có URL nhạc! Đang chuyển bài...", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Không có URL audio! Đang chuyển bài...", Toast.LENGTH_SHORT).show();
                 handleSongCompletion();
             }
             return;
@@ -250,13 +250,13 @@ public class PlayerActivity extends AppCompatActivity
             mediaPlayer.setOnPreparedListener(mp -> {
                 isFirstLoad = false;
                 isPreparing = false;
-                Log.d(TAG, "✅ Ready to play!");
+                Log.d(TAG, "Sẵn sàng phát!");
                 int duration = mp.getDuration();
 
                 uiHelper.updateTimers(-1, duration);
                 uiHelper.updateSeekBar(-1, duration);
 
-                // ⭐ BÀN GIAO THỜI GIAN (Hand-off)
+                // BÀN GIAO THỜI GIAN (Hand-off)
                 // Nếu có mốc thời gian được gửi đến, tua (seek) đến vị trí đó
                 if (startPositionMs > 0) {
                     try {
@@ -271,7 +271,7 @@ public class PlayerActivity extends AppCompatActivity
                     // Reset lại cờ sau khi seek, để nó không seek lại khi xoay màn hình
                     startPositionMs = 0;
                 }
-                // ⭐ KẾT THÚC BÀN GIAO
+                // KẾT THÚC BÀN GIAO
 
                 mp.start();
                 isPlaying = true;
@@ -279,18 +279,18 @@ public class PlayerActivity extends AppCompatActivity
 
                 songStartTime = System.currentTimeMillis();
                 currentPlayingTrackId = song.id;
-                Log.d(TAG, "⏱️ Song playback started: " + song.title);
+                Log.d(TAG, "Bắt đầu phát bài: " + song.title);
 
                 saveHistoryImmediately(song, duration);
                 startSeekBarUpdater();
                 uiHelper.startDiscAnimation();
 
-                Toast.makeText(this, "♫ " + song.title, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, song.title, Toast.LENGTH_SHORT).show();
             });
 
             mediaPlayer.setOnErrorListener((mp, what, extra) -> {
                 isPreparing = false;
-                Log.e(TAG, "❌ Error: " + what);
+                Log.e(TAG, "Lỗi: " + what);
                 Toast.makeText(this, "Lỗi phát nhạc!", Toast.LENGTH_LONG).show();
                 return true;
             });
@@ -314,30 +314,30 @@ public class PlayerActivity extends AppCompatActivity
 
     private void saveHistoryImmediately(Song song, int songDurationMs) {
         if (song == null || song.id == null || song.id.isEmpty()) {
-            Log.w(TAG, "⚠️ Cannot save history: Invalid song");
+            Log.w(TAG, "Không thể lưu lịch sử: bài hát không hợp lệ");
             return;
         }
         if (deezerApi == null || historyManager == null) {
-            Log.w(TAG, "⚠️ Cannot save history: API not initialized");
+            Log.w(TAG, "Không thể lưu lịch sử: API chưa khởi tạo");
             return;
         }
         String validToken = sessionManager.getValidAccessToken();
         if (validToken == null) {
-            Log.w(TAG, "⚠️ Cannot save history: No valid token");
+            Log.w(TAG, "Không thể lưu lịch sử: không có token hợp lệ");
             return;
         }
 
         final int playDurationSeconds = songDurationMs / 1000;
-        Log.d(TAG, "📝 Saving history immediately: " + song.title + " (" + playDurationSeconds + "s)");
+        Log.d(TAG, "Saving history immediately: " + song.title + " (" + playDurationSeconds + "s)");
 
         historyManager.saveHistoryAutoSave(
                 deezerApi,
                 song.id,
                 playDurationSeconds,
                 new HistoryManager.HistorySaveCallback() {
-                    @Override public void onSuccess() { Log.d(TAG, "✅ History saved"); }
-                    @Override public void onError(int code, String message) { Log.e(TAG, "❌ History save failed"); }
-                    @Override public void onSkipped(String reason) { Log.d(TAG, "⏭️ History skipped"); }
+                    @Override public void onSuccess() { Log.d(TAG, "Lịch sử đã được lưu"); }
+                    @Override public void onError(int code, String message) { Log.e(TAG, "Lưu lịch sử thất bại"); }
+                    @Override public void onSkipped(String reason) { Log.d(TAG, "Lịch sử bị bỏ qua"); }
                 }
         );
     }
@@ -346,7 +346,7 @@ public class PlayerActivity extends AppCompatActivity
         if (serviceBound && musicService != null) {
             ArrayList<Song> queue = musicService.getQueue();
             if (!queue.isEmpty()) {
-                Log.d(TAG, "🎵 Playing next song from queue (" + queue.size() + " songs)");
+                Log.d(TAG, "Đang phát bài tiếp theo từ hàng đợi (" + queue.size() + " bài)");
                 Song queueSong = queue.get(0);
                 musicService.removeFromQueue(0);
                 playQueueSong(queueSong);
@@ -377,7 +377,7 @@ public class PlayerActivity extends AppCompatActivity
             uiHelper.imgCover.animate().alpha(1f).setDuration(300).start();
         }).start();
 
-        Toast.makeText(this, "🎵 From queue: " + queueSong.title, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Từ hàng đợi: " + queueSong.title, Toast.LENGTH_SHORT).show();
     }
 
     private void setupControls() {
@@ -410,7 +410,7 @@ public class PlayerActivity extends AppCompatActivity
                         .withEndAction(() -> v.animate().scaleX(1f).scaleY(1f).setDuration(100).start())
                         .start();
             } catch (Exception e) {
-                Log.e(TAG, "Play/Pause Error: " + e.getMessage());
+                Log.e(TAG, "Lỗi Play/Pause: " + e.getMessage());
             }
         });
 
@@ -430,7 +430,7 @@ public class PlayerActivity extends AppCompatActivity
             isShuffle = !isShuffle;
             uiHelper.animateButton(v);
             uiHelper.updateShuffleButton(isShuffle);
-            Toast.makeText(this, isShuffle ? "🔀 Phát ngẫu nhiên" : "▶ Phát tuần tự", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, isShuffle ? "Phát ngẫu nhiên" : "Phát tuần tự", Toast.LENGTH_SHORT).show();
         });
 
         uiHelper.btnRepeat.setOnClickListener(v -> {
@@ -448,19 +448,19 @@ public class PlayerActivity extends AppCompatActivity
             if (isFavorite) {
                 if (favoritesManager.removeFavorite(song.title, song.artist)) {
                     uiHelper.updateLikeButton(false);
-                    Toast.makeText(this, "🤍 Đã bỏ yêu thích", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Đã bỏ yêu thích", Toast.LENGTH_SHORT).show();
                 }
             } else {
                 if (favoritesManager.addFavorite(song.title, song.artist, song.cover, song.audio)) {
                     uiHelper.updateLikeButton(true);
-                    Toast.makeText(this, "❤️ Đã thêm vào yêu thích", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Đã thêm vào yêu thích", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
         uiHelper.btnDownload.setOnClickListener(v -> {
             uiHelper.animateButton(v);
-            Toast.makeText(this, "⬇️ Tính năng tải xuống đang phát triển", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Tính năng tải xuống đang phát triển", Toast.LENGTH_SHORT).show();
         });
 
         uiHelper.btnBack.setOnClickListener(v -> finish());
@@ -473,7 +473,7 @@ public class PlayerActivity extends AppCompatActivity
                         mediaPlayer.seekTo(progress);
                         uiHelper.updateTimers(progress, -1);
                     } catch (Exception e) {
-                        Log.e(TAG, "Seek error: " + e.getMessage());
+                        Log.e(TAG, "Lỗi seek: " + e.getMessage());
                     }
                 }
             }
@@ -539,15 +539,15 @@ public class PlayerActivity extends AppCompatActivity
     private void updateRepeatButtonVisual() {
         uiHelper.updateRepeatButton(repeatMode);
         switch (repeatMode) {
-            case 0: Toast.makeText(this, "🔁 Tắt lặp lại", Toast.LENGTH_SHORT).show(); break;
-            case 1: Toast.makeText(this, "🔁 Lặp lại tất cả", Toast.LENGTH_SHORT).show(); break;
-            case 2: Toast.makeText(this, "🔂 Lặp lại một bài", Toast.LENGTH_SHORT).show(); break;
+            case 0: Toast.makeText(this, "Tắt lặp lại", Toast.LENGTH_SHORT).show(); break;
+            case 1: Toast.makeText(this, "Lặp lại tất cả", Toast.LENGTH_SHORT).show(); break;
+            case 2: Toast.makeText(this, "Lặp lại một bài", Toast.LENGTH_SHORT).show(); break;
         }
     }
 
     // Hàm này bạn đã có
     private void startSeekBarUpdater() {
-        // ⭐ SỬA LẠI: Luôn hủy các callback cũ trước khi tạo cái mới
+    // SỬA LẠI: Luôn hủy các callback cũ trước khi tạo cái mới
         if (handler != null && updateSeekBar != null) {
             handler.removeCallbacks(updateSeekBar);
         }
@@ -566,7 +566,7 @@ public class PlayerActivity extends AppCompatActivity
                             handler.postDelayed(this, 500);
                         }
                     } catch (Exception e) {
-                        Log.e(TAG, "Update error: " + e.getMessage());
+                        Log.e(TAG, "Lỗi cập nhật: " + e.getMessage());
                     }
                 }
             }
@@ -575,7 +575,7 @@ public class PlayerActivity extends AppCompatActivity
     }
 
     /**
-     * ⭐ HÀM MỚI: Chủ động dừng vòng lặp cập nhật seekbar
+     * HÀM MỚI: Chủ động dừng vòng lặp cập nhật seekbar
      */
     private void stopSeekBarUpdater() {
         if (handler != null && updateSeekBar != null) {
@@ -586,7 +586,7 @@ public class PlayerActivity extends AppCompatActivity
     @Override
     public void onFavoritesChanged() {
         runOnUiThread(() -> {
-            Log.d(TAG, "📝 Favorites changed, updating UI...");
+            Log.d(TAG, "Favorites changed, updating UI...");
             updateLikeButtonState();
         });
     }
@@ -609,7 +609,7 @@ public class PlayerActivity extends AppCompatActivity
         super.onPause();
         // KHI TẠM DỪNG ACTIVITY
         if (mediaPlayer != null) {
-            // ⭐ SỬA LỖI: Lưu lại vị trí trước khi pause
+            // SỬA LỖI: Lưu lại vị trí trước khi pause
             if (isPlaying) {
                 try {
                     lastPlaybackPosition = mediaPlayer.getCurrentPosition(); // Lưu vị trí
@@ -618,12 +618,12 @@ public class PlayerActivity extends AppCompatActivity
                 }
                 mediaPlayer.pause();
             }
-            // ⭐ KẾT THÚC SỬA
+            // KẾT THÚC SỬA
 
             isPlaying = false;
             uiHelper.stopDiscAnimation();
             uiHelper.updatePlayPauseButton(false);
-            Log.d(TAG, "⏸️ PlayerActivity paused at " + lastPlaybackPosition);
+            Log.d(TAG, "PlayerActivity paused at " + lastPlaybackPosition);
         }
     }
 
@@ -634,11 +634,11 @@ public class PlayerActivity extends AppCompatActivity
         // Hiện MiniPlayer khi thoát (cả Home và Back)
         if (mediaPlayer != null) {
             showMiniPlayer();
-            Log.d(TAG, "👋 Leaving PlayerActivity, showing MiniPlayer");
+            Log.d(TAG, "Leaving PlayerActivity, showing MiniPlayer");
         }
 
         if (songStartTime > 0) {
-            Log.d(TAG, "💾 App stopped");
+            Log.d(TAG, "App stopped");
             songStartTime = 0;
             currentPlayingTrackId = null;
         }
@@ -655,12 +655,12 @@ public class PlayerActivity extends AppCompatActivity
                 mediaPlayer.stop();
                 mediaPlayer.release();
             } catch (Exception e) {
-                Log.e(TAG, "Release error: " + e.getMessage());
+                Log.e(TAG, "Lỗi giải phóng: " + e.getMessage());
             }
             mediaPlayer = null;
         }
         if (handler != null) handler.removeCallbacks(updateSeekBar);
-        Log.d(TAG, "🛑 PlayerActivity destroyed");
+        Log.d(TAG, "PlayerActivity destroyed");
     }
 
     /**
@@ -669,7 +669,7 @@ public class PlayerActivity extends AppCompatActivity
     private void hideMiniPlayer() {
         if (serviceBound && musicService != null) {
             musicService.pause();
-            Log.d(TAG, "🔇 MiniPlayer paused");
+            Log.d(TAG, "MiniPlayer paused");
         }
     }
 
@@ -680,10 +680,10 @@ public class PlayerActivity extends AppCompatActivity
         if (serviceBound && musicService != null && playlist != null && !playlist.isEmpty()) {
             Song currentSong = playlist.get(currentSongIndex);
 
-            // ⭐ SỬA LỖI: Gọi hàm play mới với mốc thời gian
-            Log.d(TAG, "🔊 Resuming MiniPlayer at " + lastPlaybackPosition + "ms");
+            // SỬA LỖI: Gọi hàm play mới với mốc thời gian
+            Log.d(TAG, "Resuming MiniPlayer at " + lastPlaybackPosition + "ms");
             musicService.play(currentSong, lastPlaybackPosition);
-            // ⭐ KẾT THÚC SỬA
+            // KẾT THÚC SỬA
         }
     }
 }

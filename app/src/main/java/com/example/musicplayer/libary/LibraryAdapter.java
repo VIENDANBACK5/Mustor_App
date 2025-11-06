@@ -25,8 +25,6 @@ public class LibraryAdapter extends RecyclerView.Adapter<LibraryAdapter.ViewHold
 
     public interface OnItemClickListener {
         void onItemClick(LibraryItem item);
-
-        void onFavoriteClick(LibraryItem item);
     }
 
     public LibraryAdapter(Context context, List<LibraryItem> items, OnItemClickListener listener, FavoritesManager favoritesManager) {
@@ -49,7 +47,6 @@ public class LibraryAdapter extends RecyclerView.Adapter<LibraryAdapter.ViewHold
         holder.tvTitle.setText(item.getTitle());
         holder.tvSubtitle.setText(item.getSubtitle());
 
-        // Load ảnh với Glide và bo tròn góc
         RequestOptions options = new RequestOptions()
                 .transform(new RoundedCorners(item.getType() == LibraryItem.Type.ARTIST ? 200 : 16));
 

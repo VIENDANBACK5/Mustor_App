@@ -134,21 +134,21 @@ public class SearchActivity extends AppCompatActivity implements MusicAdapter.On
     }
 
     private void searchSongs(String query) {
-        Log.d(TAG, "Searching Deezer for: " + query);
+    Log.d(TAG, "Đang tìm kiếm trên Deezer: " + query);
 
-        // Use Deezer search API with query params
+    // Sử dụng API tìm kiếm của Deezer với các tham số truy vấn
         deezerApi.searchTracks(query, 20, 0).enqueue(new Callback<DeezerSearchResponse>() {
             @Override
             public void onResponse(@NonNull Call<DeezerSearchResponse> call,
-                    @NonNull Response<DeezerSearchResponse> response) {
+                @NonNull Response<DeezerSearchResponse> response) {
                 searchResults.clear();
-                // ✅ Fix: API returns { "code": 200, "data": { "tracks": [...] } }
+                // Sửa: API trả về { "code": 200, "data": { "tracks": [...] } }
                 if (response.isSuccessful() && response.body() != null 
                         && response.body().data != null 
                         && response.body().data.tracks != null) {
                     if (response.body().data.tracks.isEmpty()) {
                         tvNoResults.setVisibility(View.VISIBLE);
-                        tvNoResults.setText("Không tìm thấy kết quả cho \"" + query + "\"");
+                    tvNoResults.setText("Không tìm thấy kết quả cho \"" + query + "\"");
                     } else {
                         tvNoResults.setVisibility(View.GONE);
                         for (DeezerTrack track : response.body().data.tracks) {
@@ -158,7 +158,7 @@ public class SearchActivity extends AppCompatActivity implements MusicAdapter.On
                                     track.getArtistsString(),
                                     track.imageUrl,
                                     track.previewUrl,
-                                    "", // Lyrics
+                                    "", // Lời bài hát
                                     track.album,
                                     track.getDurationMs(),
                                     track.popularity,
@@ -168,14 +168,14 @@ public class SearchActivity extends AppCompatActivity implements MusicAdapter.On
                     }
                 } else {
                     tvNoResults.setVisibility(View.VISIBLE);
-                    tvNoResults.setText("Lỗi tìm kiếm");
+                tvNoResults.setText("Lỗi tìm kiếm");
                 }
                 searchAdapter.notifyDataSetChanged();
             }
 
             @Override
             public void onFailure(@NonNull Call<DeezerSearchResponse> call, @NonNull Throwable t) {
-                Toast.makeText(SearchActivity.this, "Lỗi: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(SearchActivity.this, "Lỗi: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 tvNoResults.setVisibility(View.VISIBLE);
                 tvNoResults.setText("Không thể kết nối");
             }
@@ -184,7 +184,7 @@ public class SearchActivity extends AppCompatActivity implements MusicAdapter.On
 
     @Override
     public void onItemClick(String trackId) {
-        // This logic now correctly calls the detail API
+    // Logic này sẽ gọi đúng API lấy chi tiết bài hát
         deezerApi.getTrackDetails(trackId).enqueue(new Callback<DeezerTrack>() {
             @Override
             public void onResponse(@NonNull Call<DeezerTrack> call, @NonNull Response<DeezerTrack> response) {
@@ -209,13 +209,13 @@ public class SearchActivity extends AppCompatActivity implements MusicAdapter.On
                     intent.putExtra("current_index", 0);
                     startActivity(intent);
                 } else {
-                    Toast.makeText(SearchActivity.this, "Could not load track details", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SearchActivity.this, "Không thể tải chi tiết bài hát", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<DeezerTrack> call, @NonNull Throwable t) {
-                Toast.makeText(SearchActivity.this, "API Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(SearchActivity.this, "Lỗi API: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

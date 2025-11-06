@@ -68,7 +68,7 @@ public class LibraryActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerView);
         tabSongs = findViewById(R.id.tabSongs);
         tabAlbums = findViewById(R.id.tabAlbums);
-        tabArtists = findViewById(R.id.tabArtists); // sẽ là null nếu layout không có
+        tabArtists = findViewById(R.id.tabArtists);
         tabFavorites = findViewById(R.id.tabFavorites);
         btnBack = findViewById(R.id.btnBack);
         searchBox = findViewById(R.id.searchBox);
@@ -234,7 +234,6 @@ public class LibraryActivity extends AppCompatActivity {
     }
 
     private void updateTabUI() {
-        // Reset tất cả tabs
         tabSongs.setBackgroundResource(R.drawable.tab_unselected);
         tabSongs.setTextColor(0xFFAAAAAA);
         tabAlbums.setBackgroundResource(R.drawable.tab_unselected);
@@ -244,7 +243,6 @@ public class LibraryActivity extends AppCompatActivity {
         tabFavorites.setBackgroundResource(R.drawable.tab_unselected);
         tabFavorites.setTextColor(0xFFAAAAAA);
 
-        // Highlight tab được chọn
         switch (currentTab) {
             case SONGS:
                 tabSongs.setBackgroundResource(R.drawable.tab_selected);

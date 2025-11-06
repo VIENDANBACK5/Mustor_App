@@ -44,10 +44,10 @@ public class HistoryActivity extends AppCompatActivity {
         setupRecyclerView();
         fetchHistory();
 
-        // DEBUG: Add long click listener to refresh
+    // Thêm listener nhấn giữ để làm mới
         recyclerViewHistory = findViewById(R.id.recyclerViewHistory);
         recyclerViewHistory.setOnLongClickListener(v -> {
-            android.util.Log.d("HistoryActivity", "🔄 Manual refresh triggered");
+            android.util.Log.d("HistoryActivity", "Đã kích hoạt làm mới thủ công");
             fetchHistory();
             return true;
         });
@@ -57,15 +57,15 @@ public class HistoryActivity extends AppCompatActivity {
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .addInterceptor(chain -> {
                     String token = sessionManager.getAccessToken();
-                    android.util.Log.d("HistoryActivity", "🔑 Token from session: "
+                    android.util.Log.d("HistoryActivity", "Token from session: "
                             + (token != null ? "Found (" + token.length() + " chars)" : "NULL"));
 
                     okhttp3.Request.Builder builder = chain.request().newBuilder();
                     if (token != null) {
                         builder.header("Authorization", "Bearer " + token);
-                        android.util.Log.d("HistoryActivity", "✅ Added Authorization header");
+                        android.util.Log.d("HistoryActivity", "Added Authorization header");
                     } else {
-                        android.util.Log.w("HistoryActivity", "⚠️ No token found, request will be sent without auth");
+                        android.util.Log.w("HistoryActivity", "No token found, request will be sent without auth");
                     }
                     return chain.proceed(builder.build());
                 })
@@ -88,63 +88,63 @@ public class HistoryActivity extends AppCompatActivity {
 
     private void fetchHistory() {
         // Pass null for trackId to get all history (not filtered)
-        android.util.Log.d("HistoryActivity", "📤 Fetching history from API...");
+        android.util.Log.d("HistoryActivity", "Fetching history from API...");
         deezerApi.getHistory(20, 0, null).enqueue(new Callback<HistoryResponse>() {
             @Override
             public void onResponse(@NonNull Call<HistoryResponse> call, @NonNull Response<HistoryResponse> response) {
-                android.util.Log.d("HistoryActivity", "📥 Response code: " + response.code());
+                android.util.Log.d("HistoryActivity", "Response code: " + response.code());
 
-                // Log raw response body
+            // Ghi log phản hồi thô
                 try {
                     if (response.body() != null) {
-                        android.util.Log.d("HistoryActivity",
-                                "📦 Raw response: " + new com.google.gson.Gson().toJson(response.body()));
+                android.util.Log.d("HistoryActivity",
+                    "Phản hồi thô: " + new com.google.gson.Gson().toJson(response.body()));
                     }
                 } catch (Exception e) {
-                    android.util.Log.e("HistoryActivity", "Failed to log response", e);
+                android.util.Log.e("HistoryActivity", "Ghi log phản hồi thất bại", e);
                 }
 
                 if (response.isSuccessful() && response.body() != null) {
                     HistoryResponse historyResponse = response.body();
-                    android.util.Log.d("HistoryActivity", "✅ Response body received");
-                    android.util.Log.d("HistoryActivity", "History list: "
-                            + (historyResponse.history != null ? historyResponse.history.size() + " items" : "null"));
-                    android.util.Log.d("HistoryActivity", "Total: " + historyResponse.total);
+                android.util.Log.d("HistoryActivity", "Đã nhận body phản hồi");
+                android.util.Log.d("HistoryActivity", "Danh sách lịch sử: "
+                    + (historyResponse.history != null ? historyResponse.history.size() + " mục" : "null"));
+                android.util.Log.d("HistoryActivity", "Tổng: " + historyResponse.total);
 
                     if (historyResponse.history != null && !historyResponse.history.isEmpty()) {
                         historyList.clear();
                         historyList.addAll(historyResponse.history);
                         adapter.notifyDataSetChanged();
                         android.util.Log.d("HistoryActivity",
-                                "✅ Updated RecyclerView with " + historyList.size() + " items");
+                                "Updated RecyclerView with " + historyList.size() + " items");
 
                         // Log first item details
                         if (!historyList.isEmpty()) {
                             HistoryResponse.HistoryItem first = historyList.get(0);
                             android.util.Log.d("HistoryActivity",
-                                    "📀 First item: " + first.trackName + " by " + first.artistName);
+                                    "First item: " + first.trackName + " by " + first.artistName);
                         }
                     } else {
-                        android.util.Log.w("HistoryActivity", "⚠️ History list is empty or null");
+                        android.util.Log.w("HistoryActivity", "History list is empty or null");
                         Toast.makeText(HistoryActivity.this, "Chưa có lịch sử phát nhạc", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    android.util.Log.e("HistoryActivity", "❌ Failed to load history: " + response.code());
+                    android.util.Log.e("HistoryActivity", "Tải lịch sử thất bại: " + response.code());
                     try {
                         String errorBody = response.errorBody() != null ? response.errorBody().string() : "null";
                         android.util.Log.e("HistoryActivity", "Error body: " + errorBody);
                     } catch (Exception e) {
-                        android.util.Log.e("HistoryActivity", "Failed to read error body", e);
+                        android.util.Log.e("HistoryActivity", "Đọc body lỗi thất bại", e);
                     }
-                    Toast.makeText(HistoryActivity.this, "Failed to load history: " + response.code(),
+                    Toast.makeText(HistoryActivity.this, "Tải lịch sử thất bại: " + response.code(),
                             Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<HistoryResponse> call, @NonNull Throwable t) {
-                android.util.Log.e("HistoryActivity", "❌ History API call failed: " + t.getMessage(), t);
-                Toast.makeText(HistoryActivity.this, "History API call failed: " + t.getMessage(), Toast.LENGTH_SHORT)
+                android.util.Log.e("HistoryActivity", "Gọi API lịch sử thất bại: " + t.getMessage(), t);
+                Toast.makeText(HistoryActivity.this, "Gọi API lịch sử thất bại: " + t.getMessage(), Toast.LENGTH_SHORT)
                         .show();
             }
         });

@@ -50,11 +50,11 @@ public class ProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        // Initialize session manager before any logout or auth actions
+    // Khởi tạo SessionManager trước khi xử lý đăng xuất hoặc xác thực
         sessionManager = new LoginActivity.SessionManager(this);
         favoritesManager = FavoritesManager.getInstance(this);
 
-        // Setup Retrofit / API client with auth interceptor
+    // Thiết lập Retrofit / client API với Interceptor thêm header xác thực
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .addInterceptor(chain -> {
                     String token = sessionManager.getAccessToken();
@@ -87,7 +87,7 @@ public class ProfileActivity extends AppCompatActivity {
         tvSongsPlayedCount = findViewById(R.id.tvSongsPlayedCount);
         tvFavoritesCount = findViewById(R.id.tvFavoritesCount);
 
-        // TODO: Load user profile data
+    // TODO: Tải dữ liệu hồ sơ người dùng
         TextView tvTitle = findViewById(R.id.tvTitle);
         if (tvTitle != null) {
             tvTitle.setText("Hồ sơ cá nhân");
@@ -121,7 +121,7 @@ public class ProfileActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull Call<LoginActivity.AuthTokenResponse.User> call, @NonNull Throwable t) {
-                Toast.makeText(ProfileActivity.this, "Could not load user profile", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ProfileActivity.this, "Không thể tải hồ sơ người dùng", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -138,15 +138,15 @@ public class ProfileActivity extends AppCompatActivity {
                     if (tvSongsPlayedCount != null) {
                         tvSongsPlayedCount.setText(formatted);
                     }
-                    android.util.Log.d("ProfileActivity", "📊 History total loaded: " + total);
+                    android.util.Log.d("ProfileActivity", "Tổng lịch sử đã tải: " + total);
                 } else {
-                    android.util.Log.e("ProfileActivity", "❌ History API failed: " + response.code());
+                    android.util.Log.e("ProfileActivity", "History API thất bại: " + response.code());
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<HistoryResponse> call, @NonNull Throwable t) {
-                android.util.Log.e("ProfileActivity", "❌ History API error: " + t.getMessage());
+                android.util.Log.e("ProfileActivity", "Lỗi History API: " + t.getMessage());
                 Toast.makeText(ProfileActivity.this, "Không thể tải lịch sử nghe nhạc", Toast.LENGTH_SHORT).show();
             }
         });
@@ -199,7 +199,7 @@ public class ProfileActivity extends AppCompatActivity {
                 intent.putExtra("USER_EMAIL", currentUser.email);
                 startActivity(intent);
             } else {
-                Toast.makeText(this, "User data not loaded yet", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Dữ liệu người dùng chưa được tải", Toast.LENGTH_SHORT).show();
             }
         });
     }

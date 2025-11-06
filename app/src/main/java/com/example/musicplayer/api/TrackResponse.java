@@ -17,6 +17,6 @@ public class TrackResponse {
     }
 
     public static class Album {
-        public String cover; // url cover
+        public String cover;
     }
 }

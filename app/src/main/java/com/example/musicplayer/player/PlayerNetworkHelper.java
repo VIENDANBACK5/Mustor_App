@@ -21,7 +21,7 @@ public class PlayerNetworkHelper {
 
     private static final String TAG = "PlayerNetworkHelper";
 
-    // Interface callback cho việc tải lời bài hát bất đồng bộ
+    // Giao diện callback cho việc tải lời bài hát bất đồng bộ
     public interface LyricsCallback {
         void onLyricsFetched(String lyrics);
         void onError(String error);
@@ -98,7 +98,7 @@ public class PlayerNetworkHelper {
                     );
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Lyrics error: " + e.getMessage());
+                Log.e(TAG, "Lỗi lấy lời bài hát: " + e.getMessage());
                 new android.os.Handler(android.os.Looper.getMainLooper()).post(() ->
                         callback.onError("Không tải được lời bài hát")
                 );

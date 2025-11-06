@@ -22,7 +22,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         setupBack();
 
-        // Example: Handle Streaming Quality click
+    // Ví dụ: Xử lý click chọn chất lượng streaming
         findViewById(R.id.btnStreamingQuality).setOnClickListener(v -> {
             Toast.makeText(this, "Mở cài đặt chất lượng stream", Toast.LENGTH_SHORT).show();
         });

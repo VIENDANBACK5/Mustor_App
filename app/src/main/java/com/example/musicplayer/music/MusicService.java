@@ -44,7 +44,7 @@ public class MusicService extends Service {
         void onPlaybackStateChanged(boolean isPlaying);
         void onSongChanged(Song song, int position);
         void onProgressChanged(int currentPosition, int duration);
-        void onQueueUpdated(); // Callback khi queue thay đổi
+    void onQueueUpdated(); // Hàm callback khi queue thay đổi
     }
 
     public class MusicBinder extends Binder {
@@ -57,7 +57,7 @@ public class MusicService extends Service {
     public void onCreate() {
         super.onCreate();
         createNotificationChannel();
-        Log.d(TAG, "✅ MusicService created");
+    Log.d(TAG, "MusicService đã khởi tạo");
     }
 
     @Override
@@ -65,10 +65,10 @@ public class MusicService extends Service {
         return binder;
     }
 
-    // ========== PUBLIC API FOR ACTIVITIES ==========
+    // ========== API CÔNG KHAI CHO ACTIVITY ==========
 
     public void setCallback(MusicServiceCallback callback) {
-        this.callback = callback;
+        this.callback = callback; 
     }
 
     /**
@@ -77,7 +77,7 @@ public class MusicService extends Service {
     public MusicServiceCallback getCallback() {
         return this.callback;
     }
-
+    // XÓA HÀM CŨ NÀY (hoặc sửa nó, nhưng thêm hàm mới dễ hơn) 
     /**
      * Đặt playlist mới và bắt đầu phát
      */
@@ -103,7 +103,7 @@ public class MusicService extends Service {
      */
     public void play(Song song, int startPositionMs) {
         if (song == null || song.audio == null || song.audio.isEmpty()) {
-            Log.e(TAG, "⚠️ Invalid song to play, skipping.");
+            Log.e(TAG, "Bài hát không hợp lệ, bỏ qua.");
             return;
         }
 
@@ -121,7 +121,7 @@ public class MusicService extends Service {
                 );
                 mediaPlayer.setOnCompletionListener(mp -> handleSongCompletion());
                 mediaPlayer.setOnErrorListener((mp, what, extra) -> {
-                    Log.e(TAG, "MediaPlayer error: " + what);
+                    Log.e(TAG, "Lỗi MediaPlayer: " + what);
                     playNext();
                     return true;
                 });
@@ -133,11 +133,11 @@ public class MusicService extends Service {
 
             mediaPlayer.setOnPreparedListener(mp -> {
 
-                // ⭐ ĐÂY LÀ PHẦN SỬA ĐỔI QUAN TRỌNG
+                // ĐÂY LÀ PHẦN SỬA ĐỔI QUAN TRỌNG
                 if (startPositionMs > 0) {
                     mp.seekTo(startPositionMs);
                 }
-                // ⭐ KẾT THÚC SỬA ĐỔI
+                // KẾT THÚC SỬA ĐỔI
 
                 mp.start();
                 isPlaying = true;
@@ -146,11 +146,11 @@ public class MusicService extends Service {
                     callback.onPlaybackStateChanged(true);
                     callback.onSongChanged(this.currentSong, -1);
                 }
-                Log.d(TAG, "🎵 Playing single song from " + startPositionMs + "ms: " + this.currentSong.title);
+                Log.d(TAG, "Phát bài đơn từ " + startPositionMs + "ms: " + this.currentSong.title);
             });
 
         } catch (Exception e) {
-            Log.e(TAG, "❌ Error playing single song: " + e.getMessage());
+            Log.e(TAG, "Lỗi khi phát bài đơn: " + e.getMessage());
         }
     }
 
@@ -178,7 +178,7 @@ public class MusicService extends Service {
             updateNotification();
             if (callback != null) callback.onPlaybackStateChanged(isPlaying);
         } catch (Exception e) {
-            Log.e(TAG, "Error togglePlayPause: " + e.getMessage());
+            Log.e(TAG, "Lỗi khi chuyển Play/Pause: " + e.getMessage());
         }
     }
 
@@ -202,12 +202,12 @@ public class MusicService extends Service {
                 isPlaying = false;
                 updateNotification(); // Cập nhật thông báo (nếu cần)
                 if (callback != null) callback.onPlaybackStateChanged(false);
-                Log.d(TAG, "⏸️ Music reset/paused by external request");
+                Log.d(TAG, "Music reset/tạm dừng theo yêu cầu bên ngoài");
 
             } catch (Exception e) {
                 // Có thể ném lỗi nếu reset() được gọi ở trạng thái không phù hợp,
                 // nhưng nó an toàn trong trường hợp này.
-                Log.e(TAG, "Error aggressive pause/reset: " + e.getMessage());
+                Log.e(TAG, "Lỗi khi pause/reset mạnh: " + e.getMessage());
             }
         }
     }
@@ -229,7 +229,7 @@ public class MusicService extends Service {
         // Không có queue, phát bài tiếp theo trong playlist
         if (playlist.isEmpty()) return;
 
-        // ⭐ SỬA LỖI: Lấy index thực sự, thay vì dùng currentSongIndex
+    // SỬA LỖI: Lấy index thực sự, thay vì dùng currentSongIndex
         int actualIndex = getActualCurrentIndex();
 
         if (isShuffle) {
@@ -239,7 +239,7 @@ public class MusicService extends Service {
             } while (randomIndex == actualIndex && playlist.size() > 1); // Dùng actualIndex
             playSong(randomIndex);
         } else {
-            // ⭐ SỬA LỖI: Dùng actualIndex
+            // SỬA LỖI: Dùng actualIndex
             playSong((actualIndex + 1) % playlist.size());
         }
     }
@@ -259,7 +259,7 @@ public class MusicService extends Service {
     public void addToQueue(Song song) {
         queue.add(song);
         if (callback != null) callback.onQueueUpdated();
-        Log.d(TAG, "➕ Added to queue: " + song.title);
+    Log.d(TAG, "Đã thêm vào hàng đợi: " + song.title);
     }
 
     public ArrayList<Song> getQueue() {
@@ -271,14 +271,14 @@ public class MusicService extends Service {
             Song removed = new ArrayList<>(queue).get(position);
             queue.remove(removed);
             if (callback != null) callback.onQueueUpdated();
-            Log.d(TAG, "➖ Removed from queue: " + removed.title);
+            Log.d(TAG, "Đã xóa khỏi hàng đợi: " + removed.title);
         }
     }
 
     public void clearQueue() {
         queue.clear();
         if (callback != null) callback.onQueueUpdated();
-        Log.d(TAG, "🗑️ Queue cleared");
+    Log.d(TAG, "Hàng đợi đã được xóa");
     }
 
     public void moveQueueItem(int fromPosition, int toPosition) {
@@ -296,7 +296,7 @@ public class MusicService extends Service {
         }
     }
 
-    // ========== GETTERS & SETTERS (Cập nhật) ==========
+    // ========== GETTER & SETTER (Cập nhật) ==========
 
     public void seekTo(int position) {
         if (mediaPlayer != null && isPlaying) {
@@ -352,14 +352,14 @@ public class MusicService extends Service {
     }
 
 
-    // ========== PRIVATE CORE LOGIC ==========
+    // ========== LOGIC CHÍNH (PRIVATE) ==========
 
     /**
      * CHỈNH SỬA: Phát bài hát từ playlist
      */
     private void playSong(int index) {
         if (playlist == null || playlist.isEmpty() || index < 0 || index >= playlist.size()) {
-            Log.e(TAG, "⚠️ Invalid playlist or index");
+            Log.e(TAG, "Playlist hoặc chỉ số không hợp lệ");
             return;
         }
 
@@ -367,7 +367,7 @@ public class MusicService extends Service {
         this.currentSong = playlist.get(currentSongIndex); // Cập nhật bài hát hiện tại
 
         if (this.currentSong == null || this.currentSong.audio == null || this.currentSong.audio.isEmpty()) {
-            Log.e(TAG, "❌ Song has no audio URL. Skipping.");
+            Log.e(TAG, "Bài hát không có URL audio. Bỏ qua.");
             playNext(); // Tự động bỏ qua và phát bài tiếp
             return;
         }
@@ -383,7 +383,7 @@ public class MusicService extends Service {
                 );
                 mediaPlayer.setOnCompletionListener(mp -> handleSongCompletion());
                 mediaPlayer.setOnErrorListener((mp, what, extra) -> {
-                    Log.e(TAG, "MediaPlayer error: " + what);
+                    Log.e(TAG, "Lỗi MediaPlayer: " + what);
                     playNext(); // Thử phát bài tiếp theo nếu có lỗi
                     return true;
                 });
@@ -401,11 +401,11 @@ public class MusicService extends Service {
                     callback.onPlaybackStateChanged(true);
                     callback.onSongChanged(this.currentSong, currentSongIndex);
                 }
-                Log.d(TAG, "🎵 Playing from playlist: " + this.currentSong.title);
+                Log.d(TAG, "Đang phát từ playlist: " + this.currentSong.title);
             });
 
         } catch (Exception e) {
-            Log.e(TAG, "❌ Error playing song: " + e.getMessage());
+            Log.e(TAG, "Lỗi khi phát bài: " + e.getMessage());
         }
     }
 
@@ -414,7 +414,7 @@ public class MusicService extends Service {
      */
     private void playQueueSong(Song song) {
         if (song == null || song.audio == null || song.audio.isEmpty()) {
-            Log.e(TAG, "⚠️ Invalid queue song, skipping.");
+            Log.e(TAG, "Bài trong hàng đợi không hợp lệ, bỏ qua.");
             playNext(); // Thử phát bài tiếp
             return;
         }
@@ -433,7 +433,7 @@ public class MusicService extends Service {
                 );
                 mediaPlayer.setOnCompletionListener(mp -> handleSongCompletion());
                 mediaPlayer.setOnErrorListener((mp, what, extra) -> {
-                    Log.e(TAG, "MediaPlayer error: " + what);
+                    Log.e(TAG, "Lỗi MediaPlayer: " + what);
                     playNext(); // Thử phát bài tiếp theo nếu có lỗi
                     return true;
                 });
@@ -451,11 +451,11 @@ public class MusicService extends Service {
                     callback.onPlaybackStateChanged(true);
                     callback.onSongChanged(this.currentSong, -1); // -1 = từ queue
                 }
-                Log.d(TAG, "🎵 Playing from queue: " + this.currentSong.title);
+                Log.d(TAG, "Đang phát từ hàng đợi: " + this.currentSong.title);
             });
 
         } catch (Exception e) {
-            Log.e(TAG, "❌ Error playing queue song: " + e.getMessage());
+            Log.e(TAG, "Lỗi khi phát bài từ hàng đợi: " + e.getMessage());
         }
     }
 
@@ -479,12 +479,12 @@ public class MusicService extends Service {
             playNext(); // playNext() sẽ xử lý vòng lặp/xáo trộn
         }
 
-        // ⭐ SỬA LỖI: Tách logic bài cuối cùng ra
+    // SỬA LỖI: Tách logic bài cuối cùng ra
         // (Áp dụng khi (Không lặp) VÀ (Không xáo trộn) VÀ (Đang ở bài cuối))
         else if (repeatMode == 0 && !isShuffle && currentSongIndex == playlist.size() - 1)
         {
             // Đã phát xong bài cuối cùng, và không lặp lại.
-            Log.d(TAG, "Playlist finished. Pausing at end.");
+            Log.d(TAG, "Kết thúc playlist. Tạm dừng ở cuối.");
             isPlaying = false;
 
             // QUAN TRỌNG: ĐỪNG ĐẶT currentSong = null
@@ -504,7 +504,7 @@ public class MusicService extends Service {
                     }
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Seek to 0 on completion failed: " + e.getMessage());
+                Log.e(TAG, "Không thể seek về 0 khi hoàn tất: " + e.getMessage());
             }
 
             // Dừng, nhưng đừng hủy, để nó có thể được phát lại
@@ -565,7 +565,7 @@ public class MusicService extends Service {
             mediaPlayer.release();
             mediaPlayer = null;
         }
-        Log.d(TAG, "🛑 MusicService destroyed");
+    Log.d(TAG, "MusicService đã bị hủy");
     }
     /**
      * THÊM MỚI: Helper để tìm index *thực sự* của bài hát hiện tại,

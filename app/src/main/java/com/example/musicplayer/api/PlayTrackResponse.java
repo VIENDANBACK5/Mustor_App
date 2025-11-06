@@ -4,7 +4,6 @@ import com.google.gson.annotations.SerializedName;
 
 /**
  * Response for POST /api/deezer/tracks/{track_id}/play
- * Tự động lưu lịch sử và trả về thông tin track
  */
 public class PlayTrackResponse {
     @SerializedName("code")

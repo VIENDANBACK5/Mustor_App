@@ -75,7 +75,7 @@ public class QueueActivity extends AppCompatActivity
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
-        // Drag & Drop
+    // Kéo & thả
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(
                 ItemTouchHelper.UP | ItemTouchHelper.DOWN, 0) {
 
@@ -137,7 +137,7 @@ public class QueueActivity extends AppCompatActivity
             }
             // Phát bài tiếp theo (sẽ lấy từ queue)
             musicService.playNext();
-            Toast.makeText(this, "Playing from queue", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Đang phát từ hàng đợi", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -150,7 +150,7 @@ public class QueueActivity extends AppCompatActivity
     private void clearQueue() {
         if (musicService != null) {
             musicService.clearQueue();
-            Toast.makeText(this, "Queue cleared", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Hàng đợi đã được xóa", Toast.LENGTH_SHORT).show();
         }
     }
 

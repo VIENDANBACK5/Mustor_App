@@ -33,7 +33,7 @@ public class FavoritesActivity extends AppCompatActivity implements FavoritesMan
     private FavoritesAdapter adapter;
     private ArrayList<FavoritesManager.FavoriteSong> favoriteSongs;
     private FavoritesManager favoritesManager;
-    private TextView txtEmptyState, txtSongCount;
+    private TextView txtSongCount;
     private ImageButton btnBack, btnClearAll;
     private View emptyStateLayout;
 
@@ -53,7 +53,6 @@ public class FavoritesActivity extends AppCompatActivity implements FavoritesMan
 
     private void initViews() {
         recyclerView = findViewById(R.id.recyclerFavorites);
-        txtEmptyState = findViewById(R.id.txtEmptyState);
         txtSongCount = findViewById(R.id.txtSongCount);
         btnBack = findViewById(R.id.btnBack);
         btnClearAll = findViewById(R.id.btnClearAll);

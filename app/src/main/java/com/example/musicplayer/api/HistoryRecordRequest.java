@@ -31,7 +31,6 @@ public class HistoryRecordRequest {
         this.playDurationSeconds = playDurationSeconds;
     }
 
-    // Getter methods to ensure proper serialization
     public String getTrackId() {
         return trackId;
     }

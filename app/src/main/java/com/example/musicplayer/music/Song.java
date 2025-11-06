@@ -1,11 +1,11 @@
 package com.example.musicplayer.music;
 
 public class Song {
-    public String id; // Deezer Track ID
+    public String id; // ID bản nhạc trên Deezer
     public String title; // Tên bài hát
     public String artist; // Tên ca sĩ
     public String cover; // URL ảnh bìa
-    public String audio; // URL nhạc preview
+    public String audio; // URL preview nhạc
     public String lyrics; // Lời bài hát
     public String albumName; // Tên album
     public int durationMs; // Độ dài bài hát (ms)
@@ -33,7 +33,7 @@ public class Song {
         this.title = title;
         this.artist = artist;
         this.cover = cover;
-        this.audio = audio; // 'preview' từ PlayerActivity sẽ được gán vào 'audio'
+    this.audio = audio; // 'preview' từ PlayerActivity sẽ được gán vào 'audio'
         this.durationMs = durationMs;
         this.lyrics = "";
         this.albumName = "";

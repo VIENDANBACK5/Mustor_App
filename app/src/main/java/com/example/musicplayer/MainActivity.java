@@ -223,7 +223,7 @@ public class MainActivity extends AppCompatActivity
             musicService.addToQueue(song);
             Toast.makeText(this, "Đã thêm vào hàng đợi: " + song.title, Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "Music service not available", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Dịch vụ nhạc không khả dụng", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -270,7 +270,7 @@ public class MainActivity extends AppCompatActivity
 
     //         @Override
     //         public void onFailure(@NonNull Call<LoginActivity.AuthTokenResponse.User> call, @NonNull Throwable t) {
-    //             Toast.makeText(MainActivity.this, "Could not load user profile", Toast.LENGTH_SHORT).show();
+    //             Toast.makeText(MainActivity.this, "Không thể tải hồ sơ người dùng", Toast.LENGTH_SHORT).show();
     //         }
     //     });
     // }
@@ -297,7 +297,7 @@ public class MainActivity extends AppCompatActivity
                             com.google.gson.JsonArray topTracks = data.getAsJsonArray("top_tracks");
                             
                             if (topTracks == null || topTracks.size() == 0) {
-                                Toast.makeText(MainActivity.this, "No chart data available", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(MainActivity.this, "Không có dữ liệu biểu đồ", Toast.LENGTH_SHORT).show();
                                 return;
                             }
                             
@@ -322,13 +322,13 @@ public class MainActivity extends AppCompatActivity
                         }
                     }
                 } else {
-                    Toast.makeText(MainActivity.this, "Failed to load chart", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Tải dữ liệu biểu đồ thất bại", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) {
-                Toast.makeText(MainActivity.this, "Failed to load chart", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Tải dữ liệu biểu đồ thất bại", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -340,13 +340,13 @@ public class MainActivity extends AppCompatActivity
                                    @NonNull Response<DeezerSearchResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     DeezerSearchResponse searchResponse = response.body();
-                    // ✅ Fix: API returns { "code": 200, "data": { "tracks": [...] } }
+                    // Sửa: API trả về { "code": 200, "data": { "tracks": [...] } }
                     if (searchResponse.data != null 
                             && searchResponse.data.tracks != null 
                             && !searchResponse.data.tracks.isEmpty()) {
                         updateSongList(searchResponse.data.tracks);
                     } else {
-                        Toast.makeText(MainActivity.this, "No results found", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "Không tìm thấy kết quả", Toast.LENGTH_SHORT).show();
                         songList.clear();
                         adapter.notifyDataSetChanged();
                     }
@@ -355,14 +355,14 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onFailure(@NonNull Call<DeezerSearchResponse> call, @NonNull Throwable t) {
-                Toast.makeText(MainActivity.this, "Search failed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Tìm kiếm thất bại", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void updateSongList(List<DeezerTrack> tracks) {
         if (tracks == null || tracks.isEmpty()) {
-            Log.w(TAG, "⚠️ updateSongList called with null or empty tracks");
+            Log.w(TAG, "updateSongList được gọi với danh sách bài hát null hoặc rỗng");
             return;
         }
         
@@ -375,7 +375,7 @@ public class MainActivity extends AppCompatActivity
         allSongs.addAll(songList);
         adapter.notifyDataSetChanged();
         
-        Log.d(TAG, "✅ Updated song list with " + tracks.size() + " tracks");
+        Log.d(TAG, "Đã cập nhật danh sách bài hát: " + tracks.size() + " bài");
     }
     // ...
 
@@ -395,8 +395,8 @@ public class MainActivity extends AppCompatActivity
         btnMiniNext = findViewById(R.id.btnMiniNext);
         btnMiniQueue = findViewById(R.id.btnMiniQueue);
 
-        // ⭐ TÍCH HỢP: Tìm nút "X" (Close)
-        // (Hãy đảm bảo ID này khớp với file layout XML của bạn)
+    // TÍCH HỢP: Tìm nút "X" (Đóng)
+    // (Hãy đảm bảo ID này khớp với file layout XML của bạn)
         ImageButton btnMiniClose = findViewById(R.id.btnMiniClose);
 
         // Ban đầu ẩn đi
@@ -435,7 +435,7 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent);
         });
 
-        // ⭐ TÍCH HỢP: Gán sự kiện click cho nút "X"
+    // TÍCH HỢP: Gán sự kiện click cho nút "X"
         if (btnMiniClose != null) {
             btnMiniClose.setOnClickListener(v -> {
                 if (serviceBound && musicService != null) {
@@ -496,7 +496,7 @@ public class MainActivity extends AppCompatActivity
                 currentPlaylist = new ArrayList<>();
             }
 
-            // ⭐ Xử lý lỗi IndexOutOfBoundsException (-1)
+            // Xử lý lỗi IndexOutOfBoundsException (-1)
             if (currentIndex == -1) {
                 boolean foundInPlaylist = false;
                 for (int i = 0; i < currentPlaylist.size(); i++) {
@@ -513,7 +513,7 @@ public class MainActivity extends AppCompatActivity
                     Log.d(TAG, "Added queue song to playlist. New index: " + currentIndex);
                 }
             }
-            // ⭐ Kết thúc xử lý lỗi
+            // Kết thúc xử lý lỗi
 
             if (currentPlaylist.isEmpty()) {
                 Toast.makeText(this, "Lỗi: Không tìm thấy playlist", Toast.LENGTH_SHORT).show();
@@ -546,12 +546,12 @@ public class MainActivity extends AppCompatActivity
             intent.putIntegerArrayListExtra("playlist_durations", playlistDurations);
             intent.putExtra("current_index", currentIndex);
 
-            // ⭐ BÀN GIAO THỜI GIAN (Hand-off)
+            // BÀN GIAO THỜI GIAN (Hand-off)
             // Lấy vị trí hiện tại của MiniPlayer và gửi nó qua Intent
             int currentPosition = musicService.getCurrentPosition();
             intent.putExtra("start_position_ms", currentPosition);
             Log.d(TAG, "Opening PlayerActivity at " + currentPosition + "ms");
-            // ⭐ KẾT THÚC BÀN GIAO
+            // KẾT THÚC BÀN GIAO
 
             intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(intent);
@@ -591,7 +591,7 @@ public class MainActivity extends AppCompatActivity
             openPlayerActivityFromMiniPlayer();
 
         } else {
-            Toast.makeText(this, "Could not find the clicked song.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Không thể tìm thấy bài hát được chọn.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -621,7 +621,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void handleLogout() {
-        Log.d(TAG, "🚀 Đang xử lý Đăng xuất...");
+    Log.d(TAG, "Đang xử lý Đăng xuất...");
 
         // Dừng MusicService
         if (serviceBound && musicService != null) {

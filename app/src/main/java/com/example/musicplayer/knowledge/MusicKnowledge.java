@@ -17,7 +17,6 @@ public class MusicKnowledge {
         this.views = views;
     }
 
-    // Getters
     public String getId() {
         return id;
     }
@@ -42,7 +41,7 @@ public class MusicKnowledge {
         return views;
     }
 
-    // Setters
+    // Các phương thức thiết lập (setters)
     public void setId(String id) {
         this.id = id;
     }

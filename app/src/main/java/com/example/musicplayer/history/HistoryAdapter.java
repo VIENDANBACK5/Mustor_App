@@ -33,7 +33,6 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         HistoryResponse.HistoryItem item = historyItems.get(position);
         holder.textViewTrackName.setText(item.trackName);
 
-        // Format: Artist - Time (e.g., "Hoang Thuy Linh - 2025-11-02 17:29")
         String artistAndTime = item.artistName + " - " + formatTime(item.listenedAt);
         holder.textViewArtistAndTime.setText(artistAndTime);
     }
@@ -44,7 +43,6 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
     }
 
     private String formatTime(String listenedAt) {
-        // Convert "2025-11-02T17:29:31.041548" to "2025-11-02 17:29"
         if (listenedAt != null && listenedAt.length() >= 16) {
             return listenedAt.substring(0, 16).replace("T", " ");
         }

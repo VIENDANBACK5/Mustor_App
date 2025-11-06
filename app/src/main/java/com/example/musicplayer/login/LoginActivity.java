@@ -25,8 +25,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.http.Body;
-import retrofit2.http.POST;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -47,7 +45,7 @@ public class LoginActivity extends AppCompatActivity {
 
         public void saveToken(String accessToken, int expiresInSeconds) {
             if (accessToken == null || accessToken.trim().isEmpty()) {
-                Log.e(TAG, "❌ Attempted to save null or empty token!");
+                Log.e(TAG, "Đã cố gắng lưu token null hoặc rỗng!");
                 return;
             }
 
@@ -58,35 +56,28 @@ public class LoginActivity extends AppCompatActivity {
             boolean saved = editor.commit(); // Use commit() instead of apply() to ensure immediate save
 
             if (saved) {
-                Log.d(TAG, "✅ Token saved successfully. Expires in " + expiresInSeconds + " seconds");
-                Log.d(TAG, "🔑 Token preview: " + accessToken.substring(0, Math.min(20, accessToken.length())) + "...");
+                Log.d(TAG, "Lưu token thành công. Hết hạn sau " + expiresInSeconds + " giây");
+                Log.d(TAG, "Xem trước token: " + accessToken.substring(0, Math.min(20, accessToken.length())) + "...");
             } else {
-                Log.e(TAG, "❌ Failed to save token to SharedPreferences!");
+                Log.e(TAG, "Lưu token vào SharedPreferences thất bại!");
             }
         }
 
-        /**
-         * Get access token without validation (may return expired token)
-         */
         public String getAccessToken() {
             String token = prefs.getString(KEY_ACCESS_TOKEN, null);
             if (token == null || token.trim().isEmpty()) {
-                Log.w(TAG, "⚠️ getAccessToken() returned null or empty token");
+                Log.w(TAG, "getAccessToken() trả về token null hoặc rỗng");
                 return null;
             }
             return token;
         }
 
-        /**
-         * Get access token only if it's valid (not null, not empty, not expired)
-         * Returns null if token is invalid
-         */
         public String getValidAccessToken() {
             String token = prefs.getString(KEY_ACCESS_TOKEN, null);
 
             // Check if token exists
             if (token == null || token.trim().isEmpty()) {
-                Log.e(TAG, "❌ Token is null or empty!");
+                Log.e(TAG, "Token null hoặc rỗng!");
                 return null;
             }
 
@@ -96,22 +87,19 @@ public class LoginActivity extends AppCompatActivity {
 
             if (currentTime >= expiresAt) {
                 long expiredSince = (currentTime - expiresAt) / 1000; // seconds
-                Log.e(TAG, "❌ Token expired " + expiredSince + " seconds ago!");
-                Log.e(TAG, "🔴 Expired at: " + new java.util.Date(expiresAt));
+                Log.e(TAG, "Token đã hết hạn " + expiredSince + " giây trước!");
+            Log.e(TAG, "Hết hạn lúc: " + new java.util.Date(expiresAt));
                 return null;
             }
 
             // Token is valid
             long timeRemaining = (expiresAt - currentTime) / 1000; // seconds
-            Log.d(TAG, "✅ Token is valid. Time remaining: " + timeRemaining + " seconds (" + (timeRemaining / 3600)
+            Log.d(TAG, "Token hợp lệ. Thời gian còn lại: " + timeRemaining + " giây (" + (timeRemaining / 3600)
                     + " hours)");
 
             return token;
         }
 
-        /**
-         * Check if token is valid (exists and not expired)
-         */
         public boolean isTokenValid() {
             String token = prefs.getString(KEY_ACCESS_TOKEN, null);
             long expiresAt = prefs.getLong(KEY_EXPIRES_AT, 0);
@@ -119,25 +107,21 @@ public class LoginActivity extends AppCompatActivity {
 
             // Log detailed status
             if (token == null || token.trim().isEmpty()) {
-                Log.w(TAG, "⚠️ isTokenValid(): Token is null or empty");
+                Log.w(TAG, "isTokenValid(): Token null hoặc rỗng");
                 return false;
             }
 
             if (currentTime >= expiresAt) {
                 long expiredSince = (currentTime - expiresAt) / 1000;
-                Log.w(TAG, "⚠️ isTokenValid(): Token expired " + expiredSince + " seconds ago");
+                Log.w(TAG, "isTokenValid(): Token đã hết hạn " + expiredSince + " giây trước");
                 return false;
             }
 
             long timeRemaining = (expiresAt - currentTime) / 1000;
-            Log.d(TAG, "✅ isTokenValid(): Token valid for " + timeRemaining + " more seconds");
+            Log.d(TAG, "isTokenValid(): Token còn hiệu lực " + timeRemaining + " giây nữa");
             return true;
         }
 
-        /**
-         * Get remaining time in seconds before token expires
-         * Returns 0 if token is expired or doesn't exist
-         */
         public long getRemainingTimeSeconds() {
             long expiresAt = prefs.getLong(KEY_EXPIRES_AT, 0);
             long currentTime = System.currentTimeMillis();
@@ -146,7 +130,7 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         public void clear() {
-            Log.d(TAG, "🗑️ Clearing session data");
+            Log.d(TAG, "Đang xóa dữ liệu phiên (session)");
             prefs.edit().clear().apply();
         }
     }

@@ -47,7 +47,7 @@ public interface DeezerApi {
     // Search tracks
     @GET("/api/deezer/search/tracks")
     Call<DeezerSearchResponse> searchTracks(
-            @Query("q") String query,  // ✅ Fixed: uses "q" as per documentation
+            @Query("q") String query,
             @Query("limit") int limit,
             @Query("offset") int offset);
 
@@ -70,7 +70,7 @@ public interface DeezerApi {
     Call<HistoryResponse> getHistory(
             @Query("limit") int limit,
             @Query("offset") int offset,
-            @Query("track_id") String trackId // Optional filter by track_id
+            @Query("track_id") String trackId
     );
 
     // Get history statistics

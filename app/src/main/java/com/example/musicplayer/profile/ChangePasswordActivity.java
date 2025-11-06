@@ -92,7 +92,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
         String newPassword = etNewPassword.getText().toString().trim();
         String confirmPassword = etAgainNewPassword.getText().toString().trim();
         
-        // Validation
+    // Kiểm tra hợp lệ
         if (TextUtils.isEmpty(currentPassword)) {
             etCurrentPassword.setError("Vui lòng nhập mật khẩu hiện tại");
             etCurrentPassword.requestFocus();
@@ -129,8 +129,8 @@ public class ChangePasswordActivity extends AppCompatActivity {
             return;
         }
         
-        // Call API
-        Log.d(TAG, "🔐 Changing password...");
+    // Gọi API
+    Log.d(TAG, "Đang thay đổi mật khẩu...");
         btnSaveChanges.setEnabled(false);
         btnSaveChanges.setText("Đang xử lý...");
         
@@ -143,20 +143,20 @@ public class ChangePasswordActivity extends AppCompatActivity {
                 btnSaveChanges.setText("Lưu thay đổi");
                 
                 if (response.isSuccessful()) {
-                    Log.d(TAG, "✅ Password changed successfully");
+                    Log.d(TAG, "Đổi mật khẩu thành công");
                     Toast.makeText(ChangePasswordActivity.this, 
                             "Đổi mật khẩu thành công!", Toast.LENGTH_SHORT).show();
                     
-                    // Clear fields
+                    // Xóa các trường
                     etCurrentPassword.setText("");
                     etNewPassword.setText("");
                     etAgainNewPassword.setText("");
                     
-                    // Close activity after 1 second
+                    // Đóng activity sau 1 giây
                     btnSaveChanges.postDelayed(() -> finish(), 1000);
                     
                 } else {
-                    Log.e(TAG, "❌ Password change failed: " + response.code());
+                    Log.e(TAG, "Đổi mật khẩu thất bại: " + response.code());
                     String errorMsg = "Đổi mật khẩu thất bại";
                     
                     if (response.code() == 400) {
@@ -174,7 +174,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
                 btnSaveChanges.setEnabled(true);
                 btnSaveChanges.setText("Lưu thay đổi");
                 
-                Log.e(TAG, "❌ Network error: " + t.getMessage());
+                Log.e(TAG, "Lỗi mạng: " + t.getMessage());
                 Toast.makeText(ChangePasswordActivity.this, 
                         "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }

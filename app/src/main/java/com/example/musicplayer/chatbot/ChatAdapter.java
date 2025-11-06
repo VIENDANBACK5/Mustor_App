@@ -33,12 +33,10 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         ChatMessage msg = messages.get(position);
         String role = msg.getRole().toLowerCase();
 
-        // Ẩn tất cả
         holder.userCard.setVisibility(View.GONE);
         holder.botCard.setVisibility(View.GONE);
         holder.systemCard.setVisibility(View.GONE);
 
-        // Hiển thị theo role
         switch (role) {
             case "user":
                 holder.userCard.setVisibility(View.VISIBLE);

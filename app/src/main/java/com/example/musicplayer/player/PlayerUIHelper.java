@@ -33,7 +33,7 @@ public class PlayerUIHelper {
 
     private static final String TAG = "PlayerUIHelper";
 
-    // Views
+    // Các view
     public ImageView imgCover, imgBackground, imgVinyl;
     public ImageButton btnPlayPause, btnBack, btnNext, btnPrevious, btnShuffle, btnRepeat, btnLike, btnDownload;
     public TextView txtTitle, txtArtist, txtLyrics, txtCurrentTime, txtTotalTime;
@@ -95,7 +95,7 @@ public class PlayerUIHelper {
                             int extractedColor = extractDominantColor(bitmap);
                             animateColorChange(extractedColor);
                             setBlurredBackground(bitmap);
-                            onCoverLoaded.run(); // Callback
+                            onCoverLoaded.run(); // Hàm callback
                         }
 
                         @Override
@@ -106,7 +106,7 @@ public class PlayerUIHelper {
         } else {
             imgCover.setImageResource(android.R.drawable.ic_menu_gallery);
             imgBackground.setImageResource(android.R.color.black);
-            onCoverLoaded.run(); // Callback
+            onCoverLoaded.run(); // Hàm callback
         }
 
         setLyrics("Đang tải lời bài hát...");
@@ -211,7 +211,7 @@ public class PlayerUIHelper {
             imgBackground.animate().alpha(0.4f).setDuration(500).start();
 
         } catch (Exception e) {
-            Log.e(TAG, "Blur error: " + e.getMessage());
+            Log.e(TAG, "Lỗi làm mờ: " + e.getMessage());
         }
     }
 
@@ -256,7 +256,7 @@ public class PlayerUIHelper {
                 return Color.HSVToColor(hsv);
             }
         } catch (Exception e) {
-            Log.e(TAG, "Color extraction error: " + e.getMessage());
+            Log.e(TAG, "Lỗi trích màu: " + e.getMessage());
         }
         return Color.parseColor("#1DB954");
     }

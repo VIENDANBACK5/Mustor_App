@@ -44,7 +44,7 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     private void setupRetrofit() {
-        // CORRECT IMPLEMENTATION: Use an Interceptor to add the auth token
+    // Triển khai đúng: Sử dụng Interceptor để thêm token xác thực
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .addInterceptor(chain -> {
                     String token = sessionManager.getAccessToken();
@@ -58,7 +58,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://192.168.30.28:5030/")
-                .client(okHttpClient) // Use the client with the interceptor
+                .client(okHttpClient) // Sử dụng client có Interceptor để thêm header xác thực
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         deezerApi = retrofit.create(DeezerApi.class);

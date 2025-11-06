@@ -135,7 +135,7 @@ public class ChatbotActivity extends AppCompatActivity {
         try {
             jsonBody.put("message", messageText);
         } catch (JSONException e) {
-            Log.e(TAG, "Failed to create JSON body", e);
+            Log.e(TAG, "Tạo body JSON thất bại", e);
             removeTypingIndicator(typingPosition);
             setInputEnabled(true);
             return;
@@ -154,7 +154,7 @@ public class ChatbotActivity extends AppCompatActivity {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.e(TAG, "API call failed: " + e.getMessage());
+                Log.e(TAG, "Gọi API thất bại: " + e.getMessage());
                 runOnUiThread(() -> {
                     removeTypingIndicator(typingPosition);
                     ChatMessage errorMessage = new ChatMessage(
@@ -172,13 +172,13 @@ public class ChatbotActivity extends AppCompatActivity {
             public void onResponse(Call call, Response response) throws IOException {
                 String responseBody = response.body() != null ? response.body().string() : "";
 
-                Log.d(TAG, "=== CHATBOT API RESPONSE ===");
-                Log.d(TAG, "Status Code: " + response.code());
-                Log.d(TAG, "Response Body: " + responseBody);
+                Log.d(TAG, "=== PHẢN HỒI CHATBOT ===");
+                Log.d(TAG, "Mã trạng thái: " + response.code());
+                Log.d(TAG, "Nội dung phản hồi: " + responseBody);
                 Log.d(TAG, "==========================");
 
                 if (!response.isSuccessful()) {
-                    Log.e(TAG, "Unexpected code " + response);
+                    Log.e(TAG, "Mã phản hồi không hợp lệ: " + response);
                     runOnUiThread(() -> {
                         removeTypingIndicator(typingPosition);
                         ChatMessage errorMessage = new ChatMessage(
@@ -200,13 +200,13 @@ public class ChatbotActivity extends AppCompatActivity {
                     String replyText;
                     if (responseObject.has("reply")) {
                         replyText = responseObject.getString("reply");
-                        Log.d(TAG, "✅ Found 'reply' field");
+                        Log.d(TAG, "Found 'reply' field");
                     } else if (responseObject.has("response")) {
                         replyText = responseObject.getString("response");
-                        Log.d(TAG, "✅ Found 'response' field");
+                        Log.d(TAG, "Found 'response' field");
                     } else if (responseObject.has("message")) {
                         replyText = responseObject.getString("message");
-                        Log.d(TAG, "✅ Found 'message' field");
+                        Log.d(TAG, "Found 'message' field");
                     } else {
                         StringBuilder keys = new StringBuilder();
                         JSONArray keysArray = responseObject.names();
@@ -215,11 +215,11 @@ public class ChatbotActivity extends AppCompatActivity {
                                 keys.append(keysArray.getString(i)).append(", ");
                             }
                         }
-                        Log.w(TAG, "❌ No valid response field. Available keys: " + keys.toString());
+                        Log.w(TAG, "Không có trường phản hồi hợp lệ. Các khóa khả dụng: " + keys.toString());
                         replyText = "Xin lỗi, tôi không hiểu định dạng phản hồi từ máy chủ.";
                     }
 
-                    Log.d(TAG, "📤 Extracted reply (" + replyText.length() + " chars): " +
+                    Log.d(TAG, "Extracted reply (" + replyText.length() + " chars): " +
                             (replyText.length() > 100 ? replyText.substring(0, 100) + "..." : replyText));
 
                     final String finalReply = replyText;
@@ -237,8 +237,8 @@ public class ChatbotActivity extends AppCompatActivity {
                         setInputEnabled(true);
                     });
                 } catch (JSONException e) {
-                    Log.e(TAG, "Failed to parse JSON response: " + e.getMessage());
-                    Log.e(TAG, "Raw response was: " + responseBody);
+                    Log.e(TAG, "Phân tích phản hồi JSON thất bại: " + e.getMessage());
+                    Log.e(TAG, "Nội dung thô: " + responseBody);
                     runOnUiThread(() -> {
                         removeTypingIndicator(typingPosition);
                         ChatMessage errorMessage = new ChatMessage(
@@ -278,19 +278,19 @@ public class ChatbotActivity extends AppCompatActivity {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.e(TAG, "API call failed: " + e.getMessage());
+                    Log.e(TAG, "Gọi API thất bại: " + e.getMessage());
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (!response.isSuccessful()) {
-                    Log.e(TAG, "Unexpected code " + response);
+                    Log.e(TAG, "Mã phản hồi không hợp lệ: " + response);
                     return;
                 }
 
                 String body = response.body() != null ? response.body().string() : null;
                 if (body == null) {
-                    Log.e(TAG, "Empty response body");
+                    Log.e(TAG, "Phản hồi rỗng");
                     return;
                 }
 
@@ -315,7 +315,7 @@ public class ChatbotActivity extends AppCompatActivity {
                     });
 
                 } catch (Exception e) {
-                    Log.e(TAG, "Failed to parse JSON: " + e.getMessage());
+                    Log.e(TAG, "Phân tích JSON thất bại: " + e.getMessage());
                 }
             }
         });
